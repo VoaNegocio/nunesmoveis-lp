@@ -6,7 +6,7 @@
  */
 
 // Imports do React e bibliotecas
-import { useState } from 'react' // Hook para gerenciar estado
+import { useState, useEffect } from 'react' // Hooks para gerenciar estado e efeitos
 import { FiStar, FiUsers, FiHome, FiAward, FiTarget, FiTool, FiCreditCard, FiClipboard } from 'react-icons/fi' // Ícones premium do Feather Icons
 import './App.css' // Estilos customizados
 
@@ -25,6 +25,11 @@ function App() {
   // Estado para rastrear quais imagens do carrossel falharam ao carregar
   // Usa array ao invés de Set para compatibilidade com React
   const [imageErrors, setImageErrors] = useState([])
+  
+  // Estado para armazenar reviews do Google
+  const [googleReviews, setGoogleReviews] = useState([])
+  const [googleRating, setGoogleRating] = useState(4.9) // Nota média do Google
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false)
   
   // ============================================
   // CONFIGURAÇÕES E DADOS
@@ -46,6 +51,34 @@ function App() {
   // 3. Clique em "Compartilhar" > "Incorporar um mapa"
   // 4. Copie o src do iframe e cole aqui
   const googleMapsEmbedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3759.5!2d-48.2584!3d-18.9186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTjCsDU1JzA3LjAiUyA0OMKwMTUnMzAuMyJX!5e0!3m2!1spt-BR!2sbr!4v1234567890123!5m2!1spt-BR!2sbr'
+  
+  // ============================================
+  // CONFIGURAÇÃO: GOOGLE REVIEWS API
+  // ============================================
+  // IMPORTANTE: Para usar a API do Google Places, você precisa:
+  // 1. Obter o Place ID do seu negócio no Google Maps
+  // 2. Criar uma API Key no Google Cloud Console
+  // 3. Habilitar a API "Places API" no Google Cloud Console
+  // 4. Por segurança, crie um backend proxy para não expor a API Key no frontend
+  // 
+  // Para obter o Place ID:
+  // 1. Acesse https://www.google.com/maps
+  // 2. Procure pelo seu negócio
+  // 3. Clique no negócio e copie o Place ID da URL ou use o Place ID Finder do Google
+  //
+  // Exemplo de Place ID: ChIJN1t_tDeuEmsRUsoyG83frY4
+  const googlePlaceId = '' // COLE O PLACE ID AQUI (ex: 'ChIJN1t_tDeuEmsRUsoyG83frY4')
+  
+  // IDs das reviews específicas que você quer exibir (opcional)
+  // Se vazio, exibirá as primeiras reviews retornadas pela API
+  // Para obter os IDs, você precisa fazer uma chamada à API primeiro
+  const selectedReviewIds = [] // Exemplo: ['review_id_1', 'review_id_2', 'review_id_3']
+  
+  // URL do backend proxy (recomendado por segurança)
+  // Crie um endpoint no seu backend que faça a chamada à API do Google
+  // Exemplo: '/api/google-reviews?placeId=...'
+  // eslint-disable-next-line no-unused-vars
+  const backendProxyUrl = '/api/google-reviews' // Ajuste conforme seu backend (será usado quando a API for integrada)
 
   // ============================================
   // DADOS: AMBIENTES DO CARROSSEL
@@ -85,7 +118,8 @@ function App() {
     target: FiTarget,      // Ícone de alvo/mira
     tool: FiTool,          // Ícone de ferramenta
     creditCard: FiCreditCard, // Ícone de cartão de crédito
-    clipboard: FiClipboard     // Ícone de prancheta
+    clipboard: FiClipboard,     // Ícone de prancheta
+    users: FiUsers         // Ícone de usuários/atendimento
   }
 
   // ============================================
@@ -119,32 +153,157 @@ function App() {
       descricao: 'Acompanhamento completo em todas as etapas',
       iconName: 'clipboard'
     },
+    {
+      titulo: 'Atendimento Exclusivo',
+      descricao: 'Atendimento que se torna uma experiência exclusiva e personalizada',
+      iconName: 'users'
+    },
   ]
 
   // ============================================
-  // DADOS: DEPOIMENTOS
+  // DADOS: DEPOIMENTOS (FALLBACK)
   // ============================================
-  // Array com depoimentos de clientes para prova social
-  const depoimentos = [
+  // Array com depoimentos de clientes para prova social (usado como fallback)
+  // Se as reviews do Google estiverem disponíveis, elas terão prioridade
+  const depoimentosFallback = [
     {
       nome: 'Maria Silva',
       cidade: 'Uberaba - MG',
       texto: 'Ficamos encantados com o resultado! A equipe da Nunes transformou nossa cozinha em um ambiente dos sonhos. Profissionalismo e qualidade impecáveis.',
-      nota: 5 // Nota de 1 a 5
+      nota: 5, // Nota de 1 a 5
+      data: '2024-01-15',
+      foto: null
     },
     {
       nome: 'João Santos',
       cidade: 'Uberaba - MG',
       texto: '38 anos de experiência realmente fazem diferença. O projeto do nosso closet ficou perfeito, exatamente como planejamos. Recomendo!',
-      nota: 5
+      nota: 5,
+      data: '2024-02-20',
+      foto: null
     },
     {
       nome: 'Ana Costa',
       cidade: 'Uberaba - MG',
       texto: 'Atendimento excepcional desde o primeiro contato. A designer entendeu perfeitamente nossa visão e entregou além das expectativas.',
-      nota: 5
+      nota: 5,
+      data: '2024-03-10',
+      foto: null
     },
   ]
+
+  // ============================================
+  // FUNÇÕES: GOOGLE REVIEWS API
+  // ============================================
+  
+  /**
+   * Busca reviews do Google Places API
+   * IMPORTANTE: Esta função deve ser chamada através de um backend proxy
+   * para não expor a API Key no frontend
+   */
+  const fetchGoogleReviews = async () => {
+    // Se não houver Place ID configurado, não faz nada
+    if (!googlePlaceId) {
+      console.log('Place ID não configurado. Usando depoimentos padrão.')
+      return
+    }
+    
+    setIsLoadingReviews(true)
+    
+    try {
+      // Opção 1: Usar backend proxy (RECOMENDADO)
+      // Descomente e ajuste conforme seu backend
+      /*
+      const response = await fetch(`${backendProxyUrl}?placeId=${googlePlaceId}`)
+      if (!response.ok) throw new Error('Erro ao buscar reviews')
+      const data = await response.json()
+      */
+      
+      // Opção 2: Chamada direta (NÃO RECOMENDADO - expõe API Key)
+      // Descomente apenas se estiver em desenvolvimento/teste
+      /*
+      const apiKey = 'SUA_API_KEY_AQUI' // NUNCA exponha isso em produção!
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${googlePlaceId}&fields=name,rating,user_ratings_total,reviews&key=${apiKey}`
+      )
+      if (!response.ok) throw new Error('Erro ao buscar reviews')
+      const data = await response.json()
+      */
+      
+      // Por enquanto, vamos simular uma resposta (remova quando integrar a API real)
+      // ESTRUTURA ESPERADA DA API:
+      /*
+      {
+        result: {
+          rating: 4.9,
+          user_ratings_total: 150,
+          reviews: [
+            {
+              author_name: "Nome do Cliente",
+              rating: 5,
+              relative_time_description: "há 2 meses",
+              text: "Texto da review...",
+              profile_photo_url: "https://...",
+              time: 1234567890
+            },
+            // ... mais reviews
+          ]
+        }
+      }
+      */
+      
+      // SIMULAÇÃO (remova quando integrar a API real):
+      await new Promise(resolve => setTimeout(resolve, 500)) // Simula delay
+      const mockData = {
+        result: {
+          rating: 4.9,
+          user_ratings_total: 150,
+          reviews: []
+        }
+      }
+      
+      // Processa as reviews
+      if (mockData.result && mockData.result.reviews) {
+        let reviews = mockData.result.reviews
+        
+        // Se houver IDs específicos selecionados, filtra apenas essas
+        if (selectedReviewIds.length > 0) {
+          reviews = reviews.filter(review => 
+            selectedReviewIds.includes(review.author_name) || 
+            selectedReviewIds.includes(review.time?.toString())
+          )
+        }
+        
+        // Limita a 6 reviews para exibição
+        reviews = reviews.slice(0, 6)
+        
+        // Formata as reviews para o formato esperado
+        const formattedReviews = reviews.map(review => ({
+          nome: review.author_name || 'Cliente',
+          cidade: 'Uberaba - MG', // A API não retorna cidade, use padrão ou obtenha de outra fonte
+          texto: review.text || '',
+          nota: review.rating || 5,
+          data: review.relative_time_description || '',
+          foto: review.profile_photo_url || null,
+          link: `https://www.google.com/maps/place/?q=place_id:${googlePlaceId}` // Link para a review no Google
+        }))
+        
+        setGoogleReviews(formattedReviews)
+        setGoogleRating(mockData.result.rating || 4.9)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar reviews do Google:', error)
+      // Em caso de erro, usa os depoimentos padrão
+    } finally {
+      setIsLoadingReviews(false)
+    }
+  }
+  
+  // Busca reviews quando o componente é montado
+  useEffect(() => {
+    fetchGoogleReviews()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Executa apenas uma vez ao montar (fetchGoogleReviews não precisa estar nas dependências)
 
   // ============================================
   // FUNÇÕES DE NAVEGAÇÃO DO CARROSSEL
@@ -165,6 +324,12 @@ function App() {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + ambientes.length) % ambientes.length)
   }
+  
+  // ============================================
+  // DADOS: DEPOIMENTOS FINAIS
+  // ============================================
+  // Usa reviews do Google se disponíveis, senão usa os depoimentos padrão
+  const depoimentos = googleReviews.length > 0 ? googleReviews : depoimentosFallback
 
   // ============================================
   // RENDERIZAÇÃO DO COMPONENTE
@@ -203,14 +368,14 @@ function App() {
               <div className="space-y-6 md:space-y-8">
                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
                   {/* Destaque para "38 anos" com background premium e efeito de brilho */}
-                  <span className="inline-block mb-3 md:mb-4 px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-[#1B4B7B]/20 via-[#2a6ba8]/25 to-[#1B4B7B]/20 backdrop-blur-sm border-2 border-[#1B4B7B]/40 rounded-2xl shadow-[0_4px_20px_rgba(27,75,123,0.3)] font-extrabold">
+                  <span className="inline-block mb-3 md:mb-4 px-6 md:px-8 py-2 md:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/60 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.2)] font-extrabold">
                     <span className="bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(27,75,123,0.5)]">
                       38 anos
                     </span>
                   </span>
                   {/* Resto do título com sombra premium e contraste elevado */}
                   <span className="block text-white font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] [text-shadow:_2px_2px_8px_rgba(0,0,0,0.9)]">
-                    transformando ambientes com móveis planejados de alto padrão.
+                    Transformando ambientes com móveis planejados de alto padrão.
                   </span>
                 </h1>
                 
@@ -317,7 +482,7 @@ function App() {
           </div>
 
           {/* Grid de cards com diferenciais - Design premium */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 justify-items-center">
             {diferenciais.map((diferencial, index) => {
               // Obtém o componente de ícone do mapa
               const IconComponent = iconMap[diferencial.iconName]
@@ -330,7 +495,7 @@ function App() {
               return (
                 <div
                   key={index}
-                  className="group relative bg-white p-8 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden"
+                  className="group relative bg-white p-8 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden w-full max-w-sm"
                 >
                   {/* Efeito de brilho sutil no hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
@@ -375,55 +540,231 @@ function App() {
       </section>
 
       {/* ============================================
-          SECTION 3 - PROVA SOCIAL
+          SECTION 3 - PROVA SOCIAL (PREMIUM)
           ============================================
           Objetivo: Mostrar credibilidade por meio de clientes reais
-          Elementos: Depoimentos, fotos dos ambientes, nota média
+          Elementos: Depoimentos do Google, fotos dos ambientes, nota média
+          Design: Premium com cards elegantes e gradientes sutis
       */}
-      <section className="py-20 px-4 bg-neutral-50">
-        <div className="max-w-7xl mx-auto">
-          {/* Cabeçalho da seção */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
-              Clientes satisfeitos são nossa maior prova de qualidade.
+      <section className="py-24 md:py-32 px-4 bg-gradient-to-b from-white via-neutral-50/50 to-white relative overflow-hidden">
+        {/* Mesh Gradient Background - Estilo moderno com formas elípticas e dinâmicas */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Camada 1 - Forma elíptica horizontal superior esquerda */}
+          <div className="absolute -top-32 -left-32 w-[900px] h-[400px] bg-gradient-to-r from-[#1B4B7B]/25 via-[#2a6ba8]/20 to-transparent rounded-full blur-[100px] rotate-12"></div>
+          
+          {/* Camada 2 - Forma elíptica vertical direita */}
+          <div className="absolute top-1/4 -right-40 w-[350px] h-[800px] bg-gradient-to-l from-[#2a6ba8]/22 via-[#1B4B7B]/18 to-transparent rounded-full blur-[120px] -rotate-6"></div>
+          
+          {/* Camada 3 - Forma circular grande central */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-[#1B4B7B]/15 via-[#2a6ba8]/10 via-[#153a5f]/8 to-transparent rounded-full blur-[150px]"></div>
+          
+          {/* Camada 4 - Forma elíptica horizontal inferior */}
+          <div className="absolute -bottom-40 left-1/3 w-[800px] h-[350px] bg-gradient-to-t from-[#153a5f]/20 via-[#1B4B7B]/15 to-transparent rounded-full blur-[110px] -rotate-12"></div>
+          
+          {/* Camada 5 - Forma vertical esquerda */}
+          <div className="absolute top-0 left-0 w-[300px] h-[600px] bg-gradient-to-r from-[#1B4B7B]/18 via-[#2a6ba8]/12 to-transparent rounded-full blur-[100px]"></div>
+          
+          {/* Camada 6 - Forma pequena decorativa superior direita */}
+          <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-gradient-to-bl from-[#2a6ba8]/16 via-[#1B4B7B]/10 to-transparent rounded-full blur-[90px]"></div>
+          
+          {/* Camada 7 - Forma alongada diagonal */}
+          <div className="absolute bottom-1/3 right-1/4 w-[600px] h-[200px] bg-gradient-to-r from-[#1B4B7B]/14 via-[#2a6ba8]/10 to-transparent rounded-full blur-[100px] rotate-45"></div>
+          
+          {/* Overlay gradiente suave para harmonizar */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent via-transparent to-white/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Cabeçalho da seção - Design premium */}
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight tracking-tight">
+              <span className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent">
+                Clientes satisfeitos são nossa
+              </span>
+              <br />
+              <span className="text-[#1B4B7B]">maior prova de qualidade.</span>
             </h2>
-            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+            
+            {/* Linha decorativa sutil */}
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#1B4B7B]/30"></div>
+              <div className="w-2 h-2 rounded-full bg-[#1B4B7B]"></div>
+              <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#1B4B7B]/30"></div>
+            </div>
+            
+            <p className="text-lg md:text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed mb-8">
               Ao longo de quase quatro décadas, entregamos centenas de projetos residenciais e corporativos, sempre com alta precisão, estética e pontualidade. Veja o que nossos clientes dizem sobre a experiência com a Nunes:
             </p>
             
-            {/* Nota média destacada */}
-            <div className="mt-6 flex items-center justify-center gap-2">
-              <span className="text-3xl font-bold text-[#1B4B7B]">4.9</span>
-              <div className="flex text-yellow-400">
-                {'★'.repeat(5)} {/* 5 estrelas */}
+            {/* Nota média destacada - Design premium */}
+            <div className="inline-flex items-center justify-center gap-4 px-8 py-4 bg-gradient-to-r from-white/90 to-white/80 backdrop-blur-md border border-[#1B4B7B]/20 rounded-2xl shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B4B7B]/10 to-[#1B4B7B]/5 flex items-center justify-center border-2 border-[#1B4B7B]/20">
+                  <FiStar className="w-8 h-8 text-[#1B4B7B]" />
+                </div>
+                <div className="text-left">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-bold text-[#1B4B7B]">
+                      {googleRating.toFixed(1)}
+                    </span>
+                    <span className="text-xl text-neutral-600">/ 5</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    {[...Array(5)].map((_, i) => (
+                      <FiStar
+                        key={i}
+                        className={`w-5 h-5 ${
+                          i < Math.floor(googleRating)
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : i < googleRating
+                            ? 'text-yellow-400 fill-yellow-400/50'
+                            : 'text-neutral-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <span className="text-neutral-600">/ 5</span>
+              {googleReviews.length > 0 && (
+                <div className="h-12 w-px bg-neutral-300"></div>
+              )}
+              {googleReviews.length > 0 && (
+                <div className="text-left">
+                  <p className="text-sm text-neutral-500 mb-1">Avaliações no Google</p>
+                  <p className="text-lg font-semibold text-neutral-900">
+                    {googleReviews.length}+ avaliações verificadas
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Grid de depoimentos */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {depoimentos.map((depoimento, index) => (
-              <div
-                key={index}
-                className="bg-white p-6 rounded-xl shadow-md border border-neutral-200 hover:shadow-lg transition-shadow duration-300"
-              >
-                {/* Estrelas de avaliação */}
-                <div className="flex items-center gap-1 mb-4 text-yellow-400">
-                  {'★'.repeat(depoimento.nota)}
-                </div>
-                
-                {/* Texto do depoimento */}
-                <p className="text-neutral-700 mb-4 leading-relaxed italic">"{depoimento.texto}"</p>
-                
-                {/* Informações do cliente */}
-                <div className="border-t border-neutral-200 pt-4">
-                  <p className="font-semibold text-neutral-900">{depoimento.nome}</p>
-                  <p className="text-sm text-neutral-600">{depoimento.cidade}</p>
-                </div>
+          {/* Grid de depoimentos - Design premium */}
+          {isLoadingReviews ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 border-4 border-[#1B4B7B]/20 border-t-[#1B4B7B] rounded-full animate-spin"></div>
+                <p className="text-neutral-600">Carregando avaliações...</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {depoimentos.map((depoimento, index) => (
+                <div
+                  key={index}
+                  className="group relative bg-white p-8 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden"
+                >
+                  {/* Efeito de brilho sutil no hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
+                  
+                  {/* Badge do Google (se for review do Google) */}
+                  {depoimento.link && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <a
+                        href={depoimento.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-white/90 backdrop-blur-sm border border-neutral-200 rounded-full text-xs font-medium text-neutral-700 hover:bg-white hover:border-[#1B4B7B]/40 transition-all"
+                        title="Ver no Google"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Google
+                      </a>
+                    </div>
+                  )}
+                  
+                  {/* Container do conteúdo */}
+                  <div className="relative z-10">
+                    {/* Estrelas de avaliação - Design premium */}
+                    <div className="flex items-center gap-1 mb-6">
+                      {[...Array(5)].map((_, i) => (
+                        <FiStar
+                          key={i}
+                          className={`w-5 h-5 ${
+                            i < depoimento.nota
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-neutral-300'
+                          }`}
+                        />
+                      ))}
+                      <span className="ml-2 text-sm font-semibold text-neutral-600">
+                        {depoimento.nota}.0
+                      </span>
+                    </div>
+                    
+                    {/* Texto do depoimento */}
+                    <p className="text-neutral-700 mb-6 leading-relaxed text-base italic relative">
+                      <span className="absolute -left-2 -top-1 text-4xl text-[#1B4B7B]/10 font-serif leading-none">"</span>
+                      {depoimento.texto}
+                      <span className="absolute -right-2 -bottom-4 text-4xl text-[#1B4B7B]/10 font-serif leading-none">"</span>
+                    </p>
+                    
+                    {/* Informações do cliente - Design premium */}
+                    <div className="flex items-center gap-4 pt-6 border-t border-neutral-200/80">
+                      {/* Foto do cliente (se disponível) */}
+                      {depoimento.foto ? (
+                        <img
+                          src={depoimento.foto}
+                          alt={depoimento.nome}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-neutral-200"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1B4B7B]/20 to-[#1B4B7B]/10 flex items-center justify-center border-2 border-neutral-200">
+                          <span className="text-lg font-bold text-[#1B4B7B]">
+                            {depoimento.nome.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="font-semibold text-neutral-900 mb-1">{depoimento.nome}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-neutral-600">{depoimento.cidade}</p>
+                          {depoimento.data && (
+                            <>
+                              <span className="text-neutral-400">•</span>
+                              <p className="text-sm text-neutral-500">{depoimento.data}</p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Linha decorativa no hover */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Link para ver mais avaliações no Google */}
+          {googleReviews.length > 0 && (
+            <div className="text-center mt-12">
+              <a
+                href={`https://www.google.com/maps/place/?q=place_id:${googlePlaceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center justify-center gap-3 bg-white/90 backdrop-blur-md border-2 border-[#1B4B7B]/20 text-[#1B4B7B] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#1B4B7B] hover:text-white hover:border-[#1B4B7B] transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="currentColor"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor"/>
+                </svg>
+                <span>Ver todas as avaliações no Google</span>
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
@@ -545,13 +886,41 @@ function App() {
           Objetivo: Mostrar localização e facilitar visita
           Funcionalidade: Mapa clicável que abre no Google Maps
       */}
-      <section className="py-20 px-4 bg-neutral-50">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-20 px-4 bg-gradient-to-b from-white via-neutral-50/50 to-white relative overflow-hidden">
+        {/* Mesh Gradient Background - Estilo sutil e harmonioso */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Camada 1 - Forma elíptica horizontal superior direita */}
+          <div className="absolute -top-24 -right-24 w-[800px] h-[350px] bg-gradient-to-l from-[#1B4B7B]/22 via-[#2a6ba8]/18 to-transparent rounded-full blur-[100px] -rotate-12"></div>
+          
+          {/* Camada 2 - Forma elíptica vertical esquerda */}
+          <div className="absolute top-1/3 -left-32 w-[320px] h-[700px] bg-gradient-to-r from-[#2a6ba8]/20 via-[#1B4B7B]/16 to-transparent rounded-full blur-[120px] rotate-6"></div>
+          
+          {/* Camada 3 - Forma circular grande central inferior */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-gradient-to-t from-[#1B4B7B]/14 via-[#2a6ba8]/10 via-[#153a5f]/8 to-transparent rounded-full blur-[140px]"></div>
+          
+          {/* Camada 4 - Forma elíptica horizontal inferior esquerda */}
+          <div className="absolute -bottom-32 left-1/4 w-[700px] h-[300px] bg-gradient-to-t from-[#153a5f]/18 via-[#1B4B7B]/14 to-transparent rounded-full blur-[110px] rotate-12"></div>
+          
+          {/* Camada 5 - Forma vertical direita */}
+          <div className="absolute top-0 right-0 w-[280px] h-[550px] bg-gradient-to-l from-[#1B4B7B]/16 via-[#2a6ba8]/12 to-transparent rounded-full blur-[100px]"></div>
+          
+          {/* Camada 6 - Forma pequena decorativa central superior */}
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-gradient-to-br from-[#2a6ba8]/14 via-[#1B4B7B]/10 to-transparent rounded-full blur-[90px]"></div>
+          
+          {/* Camada 7 - Forma alongada diagonal superior */}
+          <div className="absolute top-1/4 right-1/3 w-[550px] h-[180px] bg-gradient-to-l from-[#1B4B7B]/12 via-[#2a6ba8]/9 to-transparent rounded-full blur-[100px] -rotate-45"></div>
+          
+          {/* Overlay gradiente suave para harmonizar */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent via-transparent to-white/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent"></div>
+        </div>
+        
+        <div className="max-w-6xl mx-auto relative z-10">
           {/* Cabeçalho da seção */}
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 text-center mb-4 drop-shadow-sm [text-shadow:_0_2px_4px_rgba(0,0,0,0.1)]">
             Venha nos visitar
           </h2>
-          <p className="text-lg text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-lg text-neutral-800 font-medium text-center mb-12 max-w-2xl mx-auto drop-shadow-sm">
             Estamos prontos para recebê-lo e apresentar nossos projetos de móveis planejados.
           </p>
 
@@ -583,7 +952,7 @@ function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="font-semibold text-[#1B4B7B]">Abrir no Google Maps</span>
+                <span className="font-bold text-[#1B4B7B] drop-shadow-sm">Abrir no Google Maps</span>
                 {/* Ícone de link externo */}
                 <svg className="w-5 h-5 text-[#1B4B7B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -594,10 +963,10 @@ function App() {
 
           {/* Informações de endereço abaixo do mapa */}
           <div className="mt-8 text-center">
-            <p className="text-neutral-700 font-medium mb-2">
+            <p className="text-neutral-900 font-semibold mb-2 text-lg drop-shadow-sm">
               <span className="text-[#1B4B7B]">📍</span> {enderecoCompleto}
             </p>
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-800 font-medium">
               Clique no mapa para ver a localização completa no Google Maps
             </p>
           </div>
