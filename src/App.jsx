@@ -851,7 +851,7 @@ function App() {
           Objetivo: Justificar racionalmente a escolha pela Nunes
           Design: Cards minimalistas com ícones lineares em azul #1B4B7B
       */}
-      <section id="diferenciais" className="py-24 md:py-32 px-4 bg-gradient-to-b from-white via-neutral-50/30 to-white relative overflow-hidden">
+      <section id="diferenciais" className="pt-8 md:pt-12 pb-2 md:pb-3 px-0 bg-gradient-to-b from-white via-neutral-50/30 to-white relative overflow-hidden">
         {/* Elemento decorativo sutil de fundo */}
         <div className="absolute inset-0 opacity-[0.02]">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#1B4B7B] rounded-full blur-3xl"></div>
@@ -859,12 +859,14 @@ function App() {
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">
-          {/* Título da seção - Design premium com background azul sutil */}
+          {/* Título da seção - Design premium com background azul estendido */}
           <div className="text-center mb-16 md:mb-20">
-            <div className="inline-block bg-gradient-to-r from-[#1B4B7B]/20 via-[#1B4B7B]/15 to-[#2a6ba8]/20 backdrop-blur-sm px-8 md:px-12 py-6 md:py-8 rounded-2xl border border-[#1B4B7B]/30 shadow-lg">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1B4B7B] leading-tight tracking-tight">
-                Atendimento com Designers de Interiores: Diferencial que transforma a Nunes Móveis na melhor escolha.
-              </h2>
+            <div className="w-full md:w-screen md:relative md:left-1/2 md:-translate-x-1/2 bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] px-4 md:px-0 lg:px-0 pt-8 md:pt-10 lg:pt-12 pb-12 md:pb-14 lg:pb-16 rounded-none shadow-xl">
+              <div className="max-w-5xl mx-auto px-4 md:px-8 lg:px-12">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight tracking-tight">
+                  Atendimento com Designers de Interiores: Diferencial que transforma a Nunes Móveis na melhor escolha.
+                </h2>
+              </div>
             </div>
           </div>
 
