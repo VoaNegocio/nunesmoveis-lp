@@ -992,6 +992,75 @@ Criar uma versão alternativa e otimizada da hero section especificamente para d
 
 ---
 
+## Alteração: Inversão de Ordem na Section 2
+
+### Data: Reorganização do conteúdo da Section 2
+
+### Objetivo
+Inverter a ordem do conteúdo na Section 2, colocando "Nossos Projetos" (tabs com carrosséis) antes do card de "Diferenciais", para melhorar o fluxo visual e destacar os projetos primeiro.
+
+### Mudança Implementada
+
+#### Antes
+1. Título da seção ("Diferenciais que transformam...")
+2. Card de Diferenciais
+3. "Nossos Projetos" (tabs com carrosséis)
+4. CTA
+
+#### Depois
+1. Título da seção ("Diferenciais que transformam...")
+2. **"Nossos Projetos" (tabs com carrosséis)** ← Subiu
+3. **Card de Diferenciais** ← Desceu
+4. CTA
+
+### Estrutura Final
+
+```jsx
+<section id="diferenciais" className="py-24 md:py-32 px-4 bg-gradient-to-b from-white via-neutral-50/30 to-white relative overflow-hidden">
+  <div className="max-w-7xl mx-auto relative z-10">
+    {/* Título da seção */}
+    <div className="text-center mb-16 md:mb-20">
+      <h2>Diferenciais que transformam a Nunes na melhor escolha.</h2>
+    </div>
+
+    {/* Nossos Projetos - Tabs com carrosséis */}
+    <div className="mb-16 md:mb-20">
+      <h3>Nossos Projetos</h3>
+      {/* Sistema de tabs (Banheiro, Sala, Cozinha) */}
+      {/* Carrosséis por categoria */}
+    </div>
+
+    {/* Card de Diferenciais */}
+    <div className="flex justify-center mt-16 md:mt-20 mb-16 md:mb-20">
+      {/* Card único de diferencial */}
+    </div>
+
+    {/* CTA */}
+    <div className="text-center mt-16 md:mt-20">
+      {/* Botão "Solicitar orçamento personalizado" */}
+    </div>
+  </div>
+</section>
+```
+
+### Razão da Mudança
+
+1. **Destaque Visual**: Projetos aparecem primeiro, criando impacto imediato
+2. **Fluxo Lógico**: Mostrar o que a empresa faz (projetos) antes de explicar como (diferenciais)
+3. **Engajamento**: Imagens chamam mais atenção que texto, melhorando retenção
+4. **Hierarquia**: Projetos são mais tangíveis e visuais que diferenciais
+
+### Ajustes Realizados
+
+- **Espaçamento**: Mantido `mb-16 md:mb-20` entre seções
+- **Margens**: Adicionado `mt-16 md:mt-20` antes do card de diferenciais para separação adequada
+- **Estrutura**: Título permanece no topo, mantendo contexto da seção
+
+### Status
+✅ **Implementado e funcionando**
+
+---
+
 ## Referências
 
 - [Tailwind CSS v4 Docs](https://tailwindcss.com/docs/installation/using-vite)

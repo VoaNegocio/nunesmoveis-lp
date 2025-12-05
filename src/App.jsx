@@ -762,47 +762,6 @@ function App() {
             </div>
           </div>
 
-          {/* Card único de diferencial - Design premium */}
-          <div className="flex justify-center mb-16 md:mb-20">
-            {diferenciais.map((diferencial, index) => {
-              const IconComponent = iconMap[diferencial.iconName]
-              
-              if (!IconComponent) {
-                return null
-              }
-              
-              return (
-                <div
-                  key={index}
-                  className="group relative bg-white p-10 md:p-12 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden w-full max-w-2xl"
-                >
-                  {/* Efeito de brilho sutil no hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
-                  
-                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                    {/* Container do ícone */}
-                    <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1B4B7B]/10 to-[#1B4B7B]/5 flex items-center justify-center group-hover:from-[#1B4B7B]/20 group-hover:to-[#1B4B7B]/10 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
-                      <IconComponent className="w-12 h-12 text-[#1B4B7B] group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    
-                    {/* Texto */}
-                    <div className="flex-1 text-center md:text-left">
-                      <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4 group-hover:text-[#1B4B7B] transition-colors duration-300">
-                        {diferencial.titulo}
-                      </h3>
-                      <p className="text-neutral-600 leading-relaxed text-lg group-hover:text-neutral-700 transition-colors duration-300">
-                        {diferencial.descricao}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Linha decorativa no hover */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
-                </div>
-              )
-            })}
-          </div>
-
           {/* Galeria com Tabs - Design premium */}
           <div className="mb-16 md:mb-20">
             <h3 className="text-3xl md:text-4xl font-bold text-neutral-900 text-center mb-12">
@@ -935,6 +894,47 @@ function App() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Card único de diferencial - Design premium */}
+          <div className="flex justify-center mt-16 md:mt-20 mb-16 md:mb-20">
+            {diferenciais.map((diferencial, index) => {
+              const IconComponent = iconMap[diferencial.iconName]
+              
+              if (!IconComponent) {
+                return null
+              }
+              
+              return (
+                <div
+                  key={index}
+                  className="group relative bg-white p-10 md:p-12 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden w-full max-w-2xl"
+                >
+                  {/* Efeito de brilho sutil no hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                    {/* Container do ícone */}
+                    <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1B4B7B]/10 to-[#1B4B7B]/5 flex items-center justify-center group-hover:from-[#1B4B7B]/20 group-hover:to-[#1B4B7B]/10 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                      <IconComponent className="w-12 h-12 text-[#1B4B7B] group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    
+                    {/* Texto */}
+                    <div className="flex-1 text-center md:text-left">
+                      <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4 group-hover:text-[#1B4B7B] transition-colors duration-300">
+                        {diferencial.titulo}
+                      </h3>
+                      <p className="text-neutral-600 leading-relaxed text-lg group-hover:text-neutral-700 transition-colors duration-300">
+                        {diferencial.descricao}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Linha decorativa no hover */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
+                </div>
+              )
+            })}
           </div>
 
           {/* CTA da seção - Design premium */}
