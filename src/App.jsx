@@ -32,9 +32,18 @@ function App() {
   const [googleRating, setGoogleRating] = useState(4.9) // Nota média do Google
   const [isLoadingReviews, setIsLoadingReviews] = useState(false)
   
-  // Estado para galeria com modal (Seção 2)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null) // Índice da imagem selecionada no modal
-  const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0) // Índice atual do carrossel da galeria
+  // Estado para galeria com modal (Seção 2) - Sistema de Tabs
+  const [activeTab, setActiveTab] = useState('banheiro') // Tab ativa: 'banheiro', 'sala', 'cozinha'
+  
+  // Estados para cada categoria de galeria
+  const [banheiroCurrentIndex, setBanheiroCurrentIndex] = useState(0)
+  const [banheiroSelectedIndex, setBanheiroSelectedIndex] = useState(null)
+  
+  const [salaCurrentIndex, setSalaCurrentIndex] = useState(0)
+  const [salaSelectedIndex, setSalaSelectedIndex] = useState(null)
+  
+  const [cozinhaCurrentIndex, setCozinhaCurrentIndex] = useState(0)
+  const [cozinhaSelectedIndex, setCozinhaSelectedIndex] = useState(null)
   
   // Estado para modal do carrossel de ambientes (Seção 4)
   const [selectedAmbienteIndex, setSelectedAmbienteIndex] = useState(null) // Índice do ambiente selecionado no modal
@@ -147,55 +156,183 @@ function App() {
   ]
   
   // ============================================
-  // DADOS: GALERIA DE IMAGENS
+  // DADOS: GALERIA DE IMAGENS POR CATEGORIA
   // ============================================
-  // Array com as imagens da galeria
-  const galeriaImagens = [
+  // Arrays com as imagens de cada categoria
+  // Estrutura esperada: public/banheiro/, public/sala/, public/cozinha/
+  const banheiroImagens = [
     { 
-      src: '/carrossel/img1.png', 
+      src: '/banheiro/img1.jpg', 
+      alt: 'Projeto de móveis planejados - Banheiro',
+      nome: 'Banheiro'
+    },
+    { 
+      src: '/banheiro/img2.jpg', 
+      alt: 'Projeto de móveis planejados - Banheiro',
+      nome: 'Banheiro'
+    },
+    { 
+      src: '/banheiro/img3.jpg', 
+      alt: 'Projeto de móveis planejados - Banheiro',
+      nome: 'Banheiro'
+    },
+  ]
+  
+  const salaImagens = [
+    { 
+      src: '/sala/sala1.jpg', 
       alt: 'Projeto de móveis planejados - Sala',
       nome: 'Sala'
     },
     { 
-      src: '/carrossel/img2.png', 
+      src: '/sala/sala2.jpg', 
+      alt: 'Projeto de móveis planejados - Sala',
+      nome: 'Sala'
+    },
+    { 
+      src: '/sala/sala3.jpg', 
+      alt: 'Projeto de móveis planejados - Sala',
+      nome: 'Sala'
+    },
+  ]
+  
+  const cozinhaImagens = [
+    { 
+      src: '/cozinha/cozinha1.jpg', 
       alt: 'Projeto de móveis planejados - Cozinha',
       nome: 'Cozinha'
     },
     { 
-      src: '/carrossel/img4.png', 
-      alt: 'Projeto de móveis planejados - Closet',
-      nome: 'Closet'
+      src: '/cozinha/cozinha2.jpg', 
+      alt: 'Projeto de móveis planejados - Cozinha',
+      nome: 'Cozinha'
     },
     { 
-      src: '/carrossel/img5.png', 
-      alt: 'Projeto de móveis planejados - Área Gourmet',
-      nome: 'Área Gourmet'
-    },
-    { 
-      src: '/carrossel/img6.png', 
-      alt: 'Projeto de móveis planejados - Ambiente Premium',
-      nome: 'Ambiente Premium'
+      src: '/cozinha/cozinha3.jpg', 
+      alt: 'Projeto de móveis planejados - Cozinha',
+      nome: 'Cozinha'
     },
   ]
   
-  // Funções para navegação da galeria
-  const nextGalleryImage = () => {
-    setGalleryCurrentIndex((prev) => (prev + 1) % galeriaImagens.length)
+  // Função para obter imagens da categoria ativa
+  const getActiveImages = () => {
+    switch(activeTab) {
+      case 'banheiro': return banheiroImagens
+      case 'sala': return salaImagens
+      case 'cozinha': return cozinhaImagens
+      default: return banheiroImagens
+    }
   }
   
-  const prevGalleryImage = () => {
-    setGalleryCurrentIndex((prev) => (prev - 1 + galeriaImagens.length) % galeriaImagens.length)
+  // Função para obter índice atual da categoria ativa
+  const getActiveCurrentIndex = () => {
+    switch(activeTab) {
+      case 'banheiro': return banheiroCurrentIndex
+      case 'sala': return salaCurrentIndex
+      case 'cozinha': return cozinhaCurrentIndex
+      default: return 0
+    }
   }
   
-  // Função para abrir modal
-  const openModal = (index) => {
-    setSelectedImageIndex(index)
-    setGalleryCurrentIndex(index)
+  // Função para obter índice selecionado da categoria ativa
+  const getActiveSelectedIndex = () => {
+    switch(activeTab) {
+      case 'banheiro': return banheiroSelectedIndex
+      case 'sala': return salaSelectedIndex
+      case 'cozinha': return cozinhaSelectedIndex
+      default: return null
+    }
   }
   
-  // Função para fechar modal
-  const closeModal = () => {
-    setSelectedImageIndex(null)
+  // Funções para navegação - Banheiro
+  const nextBanheiro = () => {
+    setBanheiroCurrentIndex((prev) => (prev + 1) % banheiroImagens.length)
+  }
+  const prevBanheiro = () => {
+    setBanheiroCurrentIndex((prev) => (prev - 1 + banheiroImagens.length) % banheiroImagens.length)
+  }
+  const openBanheiroModal = (index) => {
+    setBanheiroSelectedIndex(index)
+    setBanheiroCurrentIndex(index)
+  }
+  const closeBanheiroModal = () => {
+    setBanheiroSelectedIndex(null)
+  }
+  
+  // Funções para navegação - Sala
+  const nextSala = () => {
+    setSalaCurrentIndex((prev) => (prev + 1) % salaImagens.length)
+  }
+  const prevSala = () => {
+    setSalaCurrentIndex((prev) => (prev - 1 + salaImagens.length) % salaImagens.length)
+  }
+  const openSalaModal = (index) => {
+    setSalaSelectedIndex(index)
+    setSalaCurrentIndex(index)
+  }
+  const closeSalaModal = () => {
+    setSalaSelectedIndex(null)
+  }
+  
+  // Funções para navegação - Cozinha
+  const nextCozinha = () => {
+    setCozinhaCurrentIndex((prev) => (prev + 1) % cozinhaImagens.length)
+  }
+  const prevCozinha = () => {
+    setCozinhaCurrentIndex((prev) => (prev - 1 + cozinhaImagens.length) % cozinhaImagens.length)
+  }
+  const openCozinhaModal = (index) => {
+    setCozinhaSelectedIndex(index)
+    setCozinhaCurrentIndex(index)
+  }
+  const closeCozinhaModal = () => {
+    setCozinhaSelectedIndex(null)
+  }
+  
+  // Funções genéricas para modal baseadas na tab ativa
+  const openActiveModal = (index) => {
+    switch(activeTab) {
+      case 'banheiro': return openBanheiroModal(index)
+      case 'sala': return openSalaModal(index)
+      case 'cozinha': return openCozinhaModal(index)
+      default: return
+    }
+  }
+  
+  const closeActiveModal = () => {
+    switch(activeTab) {
+      case 'banheiro': return closeBanheiroModal()
+      case 'sala': return closeSalaModal()
+      case 'cozinha': return closeCozinhaModal()
+      default: return
+    }
+  }
+  
+  const nextActiveImage = () => {
+    switch(activeTab) {
+      case 'banheiro': return nextBanheiro()
+      case 'sala': return nextSala()
+      case 'cozinha': return nextCozinha()
+      default: return
+    }
+  }
+  
+  const prevActiveImage = () => {
+    switch(activeTab) {
+      case 'banheiro': return prevBanheiro()
+      case 'sala': return prevSala()
+      case 'cozinha': return prevCozinha()
+      default: return
+    }
+  }
+  
+  const setActiveCurrentIndex = (index) => {
+    switch(activeTab) {
+      case 'banheiro': return setBanheiroCurrentIndex(index)
+      case 'sala': return setSalaCurrentIndex(index)
+      case 'cozinha': return setCozinhaCurrentIndex(index)
+      default: return
+    }
   }
   
   // Funções para modal do carrossel de ambientes (Seção 4)
@@ -603,7 +740,7 @@ function App() {
             })}
           </div>
 
-          {/* Galeria Carrossel - Design premium */}
+          {/* Galeria com Tabs - Design premium */}
           <div className="mb-16 md:mb-20">
             <h3 className="text-3xl md:text-4xl font-bold text-neutral-900 text-center mb-12">
               <span className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent">
@@ -611,65 +748,128 @@ function App() {
               </span>
             </h3>
             
-            {/* Carrossel da galeria */}
-            <div className="relative max-w-6xl mx-auto">
-              <div className="overflow-hidden rounded-2xl bg-neutral-100">
-                <div
-                  className="flex transition-transform duration-500 ease-in-out"
-                  style={{ transform: `translateX(-${galleryCurrentIndex * 100}%)` }}
+            {/* Sistema de Tabs Premium */}
+            <div className="max-w-6xl mx-auto">
+              {/* Tabs Navigation */}
+              <div className="flex items-center justify-center gap-2 md:gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                <button
+                  onClick={() => {
+                    closeActiveModal()
+                    setActiveTab('banheiro')
+                  }}
+                  className={`relative px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg transition-all duration-300 whitespace-nowrap ${
+                    activeTab === 'banheiro'
+                      ? 'bg-[#1B4B7B] text-white shadow-lg shadow-[#1B4B7B]/30'
+                      : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200'
+                  }`}
                 >
-                  {galeriaImagens.map((imagem, index) => (
-                    <div
-                      key={index}
-                      className="min-w-full relative group cursor-pointer"
-                      onClick={() => openModal(index)}
-                    >
-                      <img
-                        src={imagem.src}
-                        alt={imagem.alt}
-                        className="w-full h-[400px] md:h-[500px] object-cover group-hover:opacity-90 transition-opacity"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 pointer-events-none">
-                        <p className="text-white font-semibold text-lg">{imagem.nome}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                  Banheiro
+                  {activeTab === 'banheiro' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/50 rounded-b-xl"></div>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    closeActiveModal()
+                    setActiveTab('sala')
+                  }}
+                  className={`relative px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg transition-all duration-300 whitespace-nowrap ${
+                    activeTab === 'sala'
+                      ? 'bg-[#1B4B7B] text-white shadow-lg shadow-[#1B4B7B]/30'
+                      : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200'
+                  }`}
+                >
+                  Sala
+                  {activeTab === 'sala' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/50 rounded-b-xl"></div>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    closeActiveModal()
+                    setActiveTab('cozinha')
+                  }}
+                  className={`relative px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg transition-all duration-300 whitespace-nowrap ${
+                    activeTab === 'cozinha'
+                      ? 'bg-[#1B4B7B] text-white shadow-lg shadow-[#1B4B7B]/30'
+                      : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200'
+                  }`}
+                >
+                  Cozinha
+                  {activeTab === 'cozinha' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/50 rounded-b-xl"></div>
+                  )}
+                </button>
               </div>
-
-              {/* Botões de navegação */}
-              <button
-                onClick={prevGalleryImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                aria-label="Imagem anterior"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
               
-              <button
-                onClick={nextGalleryImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                aria-label="Próxima imagem"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+              {/* Carrossel da categoria ativa */}
+              <div className="relative">
+                <div className="overflow-hidden rounded-2xl bg-neutral-100">
+                  <div
+                    className="flex transition-transform duration-500 ease-in-out"
+                    style={{ transform: `translateX(-${getActiveCurrentIndex() * 100}%)` }}
+                  >
+                    {getActiveImages().map((imagem, index) => (
+                      <div
+                        key={index}
+                        className="min-w-full relative group cursor-pointer"
+                        onClick={() => openActiveModal(index)}
+                      >
+                        <img
+                          src={imagem.src}
+                          alt={imagem.alt}
+                          className="w-full h-[400px] md:h-[500px] object-cover group-hover:opacity-90 transition-opacity"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 pointer-events-none">
+                          <p className="text-white font-semibold text-lg">{imagem.nome}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Indicadores */}
-              <div className="flex justify-center gap-2 mt-6">
-                {galeriaImagens.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setGalleryCurrentIndex(index)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      index === galleryCurrentIndex ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
-                    }`}
-                    aria-label={`Ir para imagem ${index + 1}`}
-                  />
-                ))}
+                {/* Botões de navegação */}
+                {getActiveImages().length > 1 && (
+                  <>
+                    <button
+                      onClick={prevActiveImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                      aria-label="Imagem anterior"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    <button
+                      onClick={nextActiveImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                      aria-label="Próxima imagem"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+
+                {/* Indicadores */}
+                {getActiveImages().length > 1 && (
+                  <div className="flex justify-center gap-2 mt-6">
+                    {getActiveImages().map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setActiveCurrentIndex(index)}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          index === getActiveCurrentIndex() ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
+                        }`}
+                        aria-label={`Ir para imagem ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -692,18 +892,19 @@ function App() {
       </section>
 
       {/* ============================================
-          MODAL DA GALERIA
+          MODAL DA GALERIA (SISTEMA DE TABS)
           ============================================
           Modal premium para exibir imagens em tamanho maior
+          Reutilizado para todas as categorias (Banheiro, Sala, Cozinha)
       */}
       <GalleryModal
-        isOpen={selectedImageIndex !== null}
-        onClose={closeModal}
-        images={galeriaImagens}
-        currentIndex={galleryCurrentIndex}
-        onNext={nextGalleryImage}
-        onPrev={prevGalleryImage}
-        onSelectImage={setGalleryCurrentIndex}
+        isOpen={getActiveSelectedIndex() !== null}
+        onClose={closeActiveModal}
+        images={getActiveImages()}
+        currentIndex={getActiveCurrentIndex()}
+        onNext={nextActiveImage}
+        onPrev={prevActiveImage}
+        onSelectImage={setActiveCurrentIndex}
       />
 
       {/* ============================================

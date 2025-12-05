@@ -522,6 +522,303 @@ const prevAmbienteModal = () => {
 
 ---
 
+## Implementação: Sistema de Tabs com Carrosséis por Categoria (Seção 2)
+
+### Data: Implementação do sistema de tabs premium
+
+### Objetivo
+Transformar a galeria única da seção 2 em um sistema de tabs organizado por categorias (Banheiro, Sala, Cozinha), cada uma com seu próprio carrossel e modal, mantendo o design premium e reutilizando o componente `GalleryModal`.
+
+### Pensamento e Decisões de Design
+
+#### 1. Por que Tabs ao invés de Seções Verticais?
+- **Organização**: Com 3 imagens por categoria, tabs são mais eficientes em espaço
+- **Navegação**: Melhor UX para alternar entre categorias
+- **Profissionalismo**: Design mais moderno e organizado
+- **Mobile-friendly**: Scroll horizontal nas tabs funciona melhor em mobile
+- **Foco**: Uma categoria por vez mantém o foco do usuário
+
+#### 2. Estrutura de Estados Independentes
+```javascript
+// Estado para controlar qual tab está ativa
+const [activeTab, setActiveTab] = useState('banheiro') // 'banheiro', 'sala', 'cozinha'
+
+// Estados independentes para cada categoria
+const [banheiroCurrentIndex, setBanheiroCurrentIndex] = useState(0)
+const [banheiroSelectedIndex, setBanheiroSelectedIndex] = useState(null)
+
+const [salaCurrentIndex, setSalaCurrentIndex] = useState(0)
+const [salaSelectedIndex, setSalaSelectedIndex] = useState(null)
+
+const [cozinhaCurrentIndex, setCozinhaCurrentIndex] = useState(0)
+const [cozinhaSelectedIndex, setCozinhaSelectedIndex] = useState(null)
+```
+
+**Decisão**: Estados separados por categoria permitem:
+- Navegação independente em cada categoria
+- Manter posição do carrossel ao trocar de tab
+- Modal independente por categoria
+- Melhor controle de estado e performance
+
+#### 3. Funções Genéricas vs Específicas
+```javascript
+// Funções específicas por categoria
+const nextBanheiro = () => { ... }
+const openBanheiroModal = (index) => { ... }
+
+// Funções genéricas que adaptam à tab ativa
+const getActiveImages = () => {
+  switch(activeTab) {
+    case 'banheiro': return banheiroImagens
+    case 'sala': return salaImagens
+    case 'cozinha': return cozinhaImagens
+    default: return banheiroImagens
+  }
+}
+
+const openActiveModal = (index) => {
+  switch(activeTab) {
+    case 'banheiro': return openBanheiroModal(index)
+    case 'sala': return openSalaModal(index)
+    case 'cozinha': return openCozinhaModal(index)
+  }
+}
+```
+
+**Decisão**: Híbrido de funções específicas e genéricas porque:
+- Funções específicas: Mais controle e clareza
+- Funções genéricas: Reduz duplicação no JSX
+- Facilita manutenção: Mudanças em uma categoria não afetam outras
+
+### Implementação do Código
+
+#### Estrutura de Dados
+```javascript
+// Arrays de imagens por categoria
+const banheiroImagens = [
+  { 
+    src: '/banheiro/img1.png', 
+    alt: 'Projeto de móveis planejados - Banheiro',
+    nome: 'Banheiro'
+  },
+  { src: '/banheiro/img2.png', ... },
+  { src: '/banheiro/img3.png', ... },
+]
+
+const salaImagens = [
+  { src: '/sala/img1.png', ... },
+  { src: '/sala/img2.png', ... },
+  { src: '/sala/img3.png', ... },
+]
+
+const cozinhaImagens = [
+  { src: '/cozinha/img1.png', ... },
+  { src: '/cozinha/img2.png', ... },
+  { src: '/cozinha/img3.png', ... },
+]
+```
+
+**Estrutura de pastas esperada**:
+```
+public/
+├── banheiro/
+│   ├── img1.png
+│   ├── img2.png
+│   └── img3.png
+├── sala/
+│   ├── img1.png
+│   ├── img2.png
+│   └── img3.png
+└── cozinha/
+    ├── img1.png
+    ├── img2.png
+    └── img3.png
+```
+
+#### Componente de Tabs
+```jsx
+{/* Tabs Navigation */}
+<div className="flex items-center justify-center gap-2 md:gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+  <button
+    onClick={() => {
+      closeActiveModal() // Fecha modal ao trocar de tab
+      setActiveTab('banheiro')
+    }}
+    className={`relative px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg transition-all duration-300 whitespace-nowrap ${
+      activeTab === 'banheiro'
+        ? 'bg-[#1B4B7B] text-white shadow-lg shadow-[#1B4B7B]/30'
+        : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200'
+    }`}
+  >
+    Banheiro
+    {activeTab === 'banheiro' && (
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/50 rounded-b-xl"></div>
+    )}
+  </button>
+  {/* Tabs Sala e Cozinha com mesmo padrão */}
+</div>
+```
+
+**Decisões de design**:
+1. **Indicador visual**: Linha inferior branca na tab ativa
+2. **Cores**: Azul da marca (#1B4B7B) para tab ativa, branco para inativas
+3. **Hover**: Efeito sutil em tabs inativas
+4. **Fechamento de modal**: Fecha automaticamente ao trocar de tab
+5. **Responsivo**: Scroll horizontal em mobile se necessário
+
+#### Carrossel Dinâmico
+```jsx
+{/* Carrossel da categoria ativa */}
+<div className="relative">
+  <div className="overflow-hidden rounded-2xl bg-neutral-100">
+    <div
+      className="flex transition-transform duration-500 ease-in-out"
+      style={{ transform: `translateX(-${getActiveCurrentIndex() * 100}%)` }}
+    >
+      {getActiveImages().map((imagem, index) => (
+        <div
+          key={index}
+          className="min-w-full relative group cursor-pointer"
+          onClick={() => openActiveModal(index)}
+        >
+          <img
+            src={imagem.src}
+            alt={imagem.alt}
+            className="w-full h-[400px] md:h-[500px] object-cover group-hover:opacity-90 transition-opacity"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 pointer-events-none">
+            <p className="text-white font-semibold text-lg">{imagem.nome}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  
+  {/* Botões de navegação e indicadores */}
+</div>
+```
+
+**Características**:
+- Carrossel adapta-se dinamicamente à categoria ativa
+- Usa funções genéricas (`getActiveImages()`, `getActiveCurrentIndex()`)
+- Mantém mesmo design premium do carrossel original
+- Navegação completa (setas + indicadores)
+
+#### Modal Reutilizado
+```jsx
+<GalleryModal
+  isOpen={getActiveSelectedIndex() !== null}
+  onClose={closeActiveModal}
+  images={getActiveImages()}
+  currentIndex={getActiveCurrentIndex()}
+  onNext={nextActiveImage}
+  onPrev={prevActiveImage}
+  onSelectImage={setActiveCurrentIndex}
+/>
+```
+
+**Vantagens**:
+- Um único modal para todas as categorias
+- Funciona dinamicamente com a categoria ativa
+- Todas as funcionalidades já implementadas (ESC, backdrop blur, navegação)
+- Código limpo e reutilizável
+
+### Funcionalidades Implementadas
+
+✅ **Sistema de Tabs**: 3 tabs (Banheiro, Sala, Cozinha) com design premium  
+✅ **Estados independentes**: Cada categoria mantém seu próprio estado  
+✅ **Carrossel dinâmico**: Adapta-se à categoria ativa  
+✅ **Modal reutilizado**: Um único modal para todas as categorias  
+✅ **Navegação completa**: Setas, indicadores, teclado  
+✅ **Fechamento automático**: Modal fecha ao trocar de tab  
+✅ **Design premium**: Alinhado com o restante do site  
+✅ **Responsivo**: Funciona perfeitamente em mobile  
+✅ **Transições suaves**: Animações CSS em todas as interações  
+
+### Estrutura de Estados
+
+| Estado | Propósito |
+|--------|-----------|
+| `activeTab` | Controla qual tab está ativa ('banheiro', 'sala', 'cozinha') |
+| `banheiroCurrentIndex` | Índice atual do carrossel de banheiro |
+| `banheiroSelectedIndex` | Índice da imagem selecionada no modal (null = fechado) |
+| `salaCurrentIndex` | Índice atual do carrossel de sala |
+| `salaSelectedIndex` | Índice da imagem selecionada no modal |
+| `cozinhaCurrentIndex` | Índice atual do carrossel de cozinha |
+| `cozinhaSelectedIndex` | Índice da imagem selecionada no modal |
+
+### Funções Principais
+
+#### Funções Genéricas (usadas no JSX)
+- `getActiveImages()`: Retorna array de imagens da categoria ativa
+- `getActiveCurrentIndex()`: Retorna índice atual da categoria ativa
+- `getActiveSelectedIndex()`: Retorna índice selecionado da categoria ativa
+- `openActiveModal(index)`: Abre modal da categoria ativa
+- `closeActiveModal()`: Fecha modal da categoria ativa
+- `nextActiveImage()`: Próxima imagem da categoria ativa
+- `prevActiveImage()`: Imagem anterior da categoria ativa
+- `setActiveCurrentIndex(index)`: Define índice atual da categoria ativa
+
+#### Funções Específicas (por categoria)
+- `nextBanheiro()`, `prevBanheiro()`, `openBanheiroModal()`, `closeBanheiroModal()`
+- `nextSala()`, `prevSala()`, `openSalaModal()`, `closeSalaModal()`
+- `nextCozinha()`, `prevCozinha()`, `openCozinhaModal()`, `closeCozinhaModal()`
+
+### Fluxo de Navegação
+
+1. **Usuário clica em uma tab**:
+   - `setActiveTab('categoria')` → muda categoria ativa
+   - `closeActiveModal()` → fecha modal se estiver aberto
+   - Carrossel atualiza para mostrar imagens da nova categoria
+
+2. **Usuário navega no carrossel**:
+   - Clica em setas ou indicadores
+   - `setActiveCurrentIndex()` atualiza índice da categoria ativa
+   - Carrossel desliza para nova imagem
+
+3. **Usuário clica em uma imagem**:
+   - `openActiveModal(index)` → abre modal
+   - `setActiveSelectedIndex(index)` → define imagem selecionada
+   - Modal exibe imagem em tamanho maior
+
+4. **Usuário navega no modal**:
+   - Setas ou teclado navegam entre imagens
+   - `nextActiveImage()` / `prevActiveImage()` atualizam índice
+   - Modal sincroniza com carrossel
+
+### Diferenças em Relação à Implementação Anterior
+
+| Aspecto | Antes (Galeria Única) | Depois (Sistema de Tabs) |
+|---------|----------------------|--------------------------|
+| **Estrutura** | Um único carrossel | 3 carrosséis por categoria |
+| **Estados** | 2 estados (`selectedImageIndex`, `galleryCurrentIndex`) | 7 estados (1 para tab + 6 para categorias) |
+| **Dados** | `galeriaImagens` (array único) | 3 arrays separados por categoria |
+| **Navegação** | Carrossel único | Tabs + carrossel por categoria |
+| **Modal** | Modal único | Modal reutilizado dinamicamente |
+| **Organização** | Todas as imagens juntas | Imagens organizadas por categoria |
+
+### Vantagens da Nova Implementação
+
+1. **Organização**: Imagens separadas por categoria facilita navegação
+2. **Escalabilidade**: Fácil adicionar novas categorias no futuro
+3. **Performance**: Estados independentes evitam re-renders desnecessários
+4. **UX**: Usuário encontra o que procura mais rapidamente
+5. **Manutenção**: Código mais organizado e fácil de manter
+6. **Reutilização**: Modal e funções genéricas reduzem duplicação
+
+### Status
+✅ **Implementado e funcionando**
+
+### Próximas Melhorias Possíveis
+- [ ] Adicionar mais categorias (Closet, Área Gourmet, etc.)
+- [ ] Adicionar tab "Todos" que mostra todas as imagens
+- [ ] Adicionar filtros avançados
+- [ ] Adicionar busca por categoria
+- [ ] Adicionar animação de transição entre tabs
+- [ ] Adicionar lazy loading nas imagens
+
+---
+
 ## Referências
 
 - [Tailwind CSS v4 Docs](https://tailwindcss.com/docs/installation/using-vite)
