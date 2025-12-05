@@ -819,6 +819,179 @@ public/
 
 ---
 
+## Implementação: Hero Section Mobile Alternativa
+
+### Data: Implementação de versão mobile otimizada da hero section
+
+### Objetivo
+Criar uma versão alternativa e otimizada da hero section especificamente para dispositivos mobile, com layout mais compacto, conteúdo mais direto e melhor aproveitamento do espaço vertical limitado.
+
+### Pensamento e Decisões de Design
+
+#### 1. Por que uma Versão Mobile Separada?
+- **Espaço limitado**: Telas mobile têm menos espaço vertical e horizontal
+- **Legibilidade**: Textos menores precisam ser mais concisos
+- **Interação**: Botões precisam ser maiores e mais fáceis de clicar
+- **Performance**: Menos elementos renderizados = melhor performance
+- **UX**: Experiência otimizada para toque ao invés de mouse
+
+#### 2. Estratégia de Implementação
+```jsx
+{/* VERSÃO MOBILE - Hero Section Alternativa */}
+<div className="md:hidden relative z-10 w-full px-4 py-8">
+  {/* Conteúdo mobile otimizado */}
+</div>
+
+{/* VERSÃO DESKTOP - Hero Section Original */}
+<div className="hidden md:block relative z-10 max-w-7xl mx-auto w-full px-4 md:px-8 lg:px-12 py-12 md:py-20">
+  {/* Conteúdo desktop original */}
+</div>
+```
+
+**Decisão**: Usar classes Tailwind `md:hidden` e `hidden md:block` porque:
+- Renderiza apenas a versão necessária (não duplica conteúdo)
+- Mantém código limpo e organizado
+- Fácil de manter (versões separadas)
+- Performance otimizada (menos DOM)
+
+### Implementação do Código
+
+#### Estrutura Mobile
+```jsx
+<div className="md:hidden relative z-10 w-full px-4 py-8">
+  <div className="space-y-6">
+    {/* Badge "38 anos" em destaque centralizado */}
+    <div className="text-center">
+      <span className="inline-block px-6 py-3 bg-white/95 backdrop-blur-sm border-2 border-white/60 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+        <span className="bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] bg-clip-text text-transparent text-2xl font-extrabold">
+          38 anos
+        </span>
+      </span>
+    </div>
+
+    {/* Título principal - Mais direto e impactante */}
+    <h1 className="text-3xl font-bold text-white text-center leading-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
+      Transformando ambientes com móveis planejados de alto padrão
+    </h1>
+    
+    {/* Texto de apoio - Mais conciso */}
+    <p className="text-base text-white/95 text-center leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] px-2">
+      Excelência, pontualidade e facilidade na hora de planejar seu ambiente dos sonhos.
+    </p>
+
+    {/* CTA Principal - WhatsApp em destaque full-width */}
+    <div className="pt-4">
+      <a href={whatsappUrl} className="group relative flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] via-[#20BA5A] to-[#25D366] text-white px-6 py-4 rounded-xl font-bold text-base shadow-2xl hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 transform hover:scale-105 animate-pulse-slow overflow-hidden w-full">
+        {/* Efeitos visuais */}
+      </a>
+    </div>
+
+    {/* Badges compactos - Grid 2 colunas */}
+    <div className="grid grid-cols-2 gap-3 pt-2">
+      <div className="bg-white/90 backdrop-blur-md border border-white/20 rounded-xl px-3 py-3 shadow-lg">
+        <div className="flex items-center gap-2">
+          <FiStar className="w-5 h-5 text-[#1B4B7B] flex-shrink-0" />
+          <p className="text-xs text-neutral-800 font-semibold leading-tight">
+            38 anos de experiência
+          </p>
+        </div>
+      </div>
+      {/* Segundo badge */}
+    </div>
+  </div>
+</div>
+```
+
+### Diferenças entre Mobile e Desktop
+
+| Aspecto | Mobile | Desktop |
+|---------|--------|---------|
+| **Layout** | Centralizado, vertical | Alinhado à esquerda, mais espaçado |
+| **Título** | `text-3xl`, centralizado, mais conciso | `text-4xl md:text-5xl lg:text-7xl`, alinhado à esquerda |
+| **Texto de apoio** | `text-base`, versão reduzida | `text-lg md:text-xl lg:text-2xl`, versão completa |
+| **Badge "38 anos"** | Centralizado no topo, maior destaque | Inline com título, menor |
+| **CTA WhatsApp** | Full-width (`w-full`), mais compacto | Tamanho padrão, lado a lado com outro botão |
+| **Badges de credibilidade** | Grid 2 colunas, compactos, ícones menores | Grid 2 colunas, maiores, mais espaçados |
+| **Espaçamento** | `space-y-6`, `py-8` | `space-y-10 md:space-y-12`, `py-12 md:py-20` |
+| **Padding horizontal** | `px-4` | `px-4 md:px-8 lg:px-12` |
+
+### Decisões de Design Mobile
+
+#### 1. Badge "38 anos" em Destaque
+- **Posição**: Centralizado no topo
+- **Tamanho**: `text-2xl` (maior que desktop inline)
+- **Razão**: Primeira coisa que o usuário vê, cria impacto imediato
+
+#### 2. Título Mais Conciso
+- **Tamanho**: `text-3xl` (menor que desktop)
+- **Alinhamento**: Centralizado
+- **Conteúdo**: Mesma mensagem, mas mais direto
+- **Razão**: Melhor legibilidade em telas pequenas
+
+#### 3. Texto de Apoio Reduzido
+- **Tamanho**: `text-base`
+- **Conteúdo**: Versão resumida da mensagem principal
+- **Razão**: Evita scroll excessivo, mantém foco
+
+#### 4. CTA Full-Width
+- **Largura**: `w-full` (ocupa toda largura)
+- **Tamanho**: `px-6 py-4` (mais compacto)
+- **Razão**: Mais fácil de clicar em mobile, maior área de toque
+
+#### 5. Badges Compactos
+- **Layout**: Grid 2 colunas
+- **Tamanho**: `px-3 py-3` (menor que desktop)
+- **Ícones**: `w-5 h-5` (menores)
+- **Texto**: `text-xs` (menor)
+- **Razão**: Economiza espaço vertical, mantém informação essencial
+
+### Funcionalidades Implementadas
+
+✅ **Versão mobile separada**: Layout otimizado para telas pequenas  
+✅ **Badge destacado**: "38 anos" em destaque no topo  
+✅ **Título conciso**: Versão mais direta e impactante  
+✅ **Texto reduzido**: Mensagem essencial sem perder significado  
+✅ **CTA full-width**: Botão WhatsApp mais fácil de clicar  
+✅ **Badges compactos**: Grid 2 colunas com informações essenciais  
+✅ **Animações mantidas**: Efeitos visuais preservados  
+✅ **Responsivo**: Funciona perfeitamente em todos os tamanhos mobile  
+
+### Classes CSS Utilizadas
+
+#### Mobile (`md:hidden`)
+- `md:hidden`: Oculta em telas médias e maiores
+- `space-y-6`: Espaçamento vertical compacto
+- `text-center`: Centralização do conteúdo
+- `w-full`: Largura total para CTA
+- `grid grid-cols-2`: Grid 2 colunas para badges
+- `text-xs`: Texto pequeno para badges
+
+#### Desktop (`hidden md:block`)
+- `hidden md:block`: Oculta em mobile, mostra em desktop
+- Mantém estrutura original da hero section
+
+### Vantagens da Implementação
+
+1. **Melhor UX Mobile**: Experiência otimizada para telas pequenas
+2. **Performance**: Menos elementos renderizados em mobile
+3. **Legibilidade**: Textos ajustados para tamanhos de tela
+4. **Interação**: Botões maiores e mais fáceis de tocar
+5. **Manutenção**: Versões separadas facilitam ajustes independentes
+6. **Flexibilidade**: Fácil testar diferentes layouts
+
+### Status
+✅ **Implementado e funcionando**
+
+### Próximas Melhorias Possíveis
+- [ ] Testar diferentes layouts mobile
+- [ ] Adicionar animações específicas para mobile
+- [ ] Otimizar imagens para mobile (lazy loading)
+- [ ] Adicionar gestos de swipe
+- [ ] Testar em diferentes dispositivos mobile
+- [ ] A/B testing entre versões
+
+---
+
 ## Referências
 
 - [Tailwind CSS v4 Docs](https://tailwindcss.com/docs/installation/using-vite)
