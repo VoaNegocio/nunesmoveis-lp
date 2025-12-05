@@ -144,32 +144,35 @@ function App() {
   const getSection4VideoEmbedUrl = (videoUrl) => {
     if (!videoUrl) return null
     
+    // Remove fragmentos (#) da URL antes de processar
+    const cleanUrl = videoUrl.split('#')[0]
+    
     // YouTube - formato youtu.be
-    if (videoUrl.includes('youtu.be/')) {
-      const videoId = videoUrl.split('youtu.be/')[1].split('?')[0]
+    if (cleanUrl.includes('youtu.be/')) {
+      const videoId = cleanUrl.split('youtu.be/')[1].split('?')[0]
       return `https://www.youtube.com/embed/${videoId}`
     }
     
     // YouTube - formato youtube.com/watch
-    if (videoUrl.includes('youtube.com/watch')) {
-      const videoId = videoUrl.split('v=')[1].split('&')[0]
+    if (cleanUrl.includes('youtube.com/watch')) {
+      const videoId = cleanUrl.split('v=')[1].split('&')[0].split('#')[0]
       return `https://www.youtube.com/embed/${videoId}`
     }
     
     // YouTube - já está em formato embed
-    if (videoUrl.includes('youtube.com/embed')) {
-      return videoUrl
+    if (cleanUrl.includes('youtube.com/embed')) {
+      return cleanUrl.split('#')[0]
     }
     
     // Vimeo - formato vimeo.com
-    if (videoUrl.includes('vimeo.com/')) {
-      const videoId = videoUrl.split('vimeo.com/')[1].split('?')[0]
+    if (cleanUrl.includes('vimeo.com/')) {
+      const videoId = cleanUrl.split('vimeo.com/')[1].split('?')[0].split('#')[0]
       return `https://player.vimeo.com/video/${videoId}`
     }
     
     // Vimeo - já está em formato player
-    if (videoUrl.includes('player.vimeo.com')) {
-      return videoUrl
+    if (cleanUrl.includes('player.vimeo.com')) {
+      return cleanUrl.split('#')[0]
     }
     
     // Arquivo local ou outro formato - retorna como está
@@ -298,32 +301,35 @@ function App() {
   const getVideoEmbedUrl = (videoUrl) => {
     if (!videoUrl) return null
     
+    // Remove fragmentos (#) da URL antes de processar
+    const cleanUrl = videoUrl.split('#')[0]
+    
     // YouTube - formato youtu.be
-    if (videoUrl.includes('youtu.be/')) {
-      const videoId = videoUrl.split('youtu.be/')[1].split('?')[0]
+    if (cleanUrl.includes('youtu.be/')) {
+      const videoId = cleanUrl.split('youtu.be/')[1].split('?')[0]
       return `https://www.youtube.com/embed/${videoId}`
     }
     
     // YouTube - formato youtube.com/watch
-    if (videoUrl.includes('youtube.com/watch')) {
-      const videoId = videoUrl.split('v=')[1].split('&')[0]
+    if (cleanUrl.includes('youtube.com/watch')) {
+      const videoId = cleanUrl.split('v=')[1].split('&')[0].split('#')[0]
       return `https://www.youtube.com/embed/${videoId}`
     }
     
     // YouTube - já está em formato embed
-    if (videoUrl.includes('youtube.com/embed')) {
-      return videoUrl
+    if (cleanUrl.includes('youtube.com/embed')) {
+      return cleanUrl.split('#')[0]
     }
     
     // Vimeo - formato vimeo.com
-    if (videoUrl.includes('vimeo.com/')) {
-      const videoId = videoUrl.split('vimeo.com/')[1].split('?')[0]
+    if (cleanUrl.includes('vimeo.com/')) {
+      const videoId = cleanUrl.split('vimeo.com/')[1].split('?')[0].split('#')[0]
       return `https://player.vimeo.com/video/${videoId}`
     }
     
     // Vimeo - já está em formato player
-    if (videoUrl.includes('player.vimeo.com')) {
-      return videoUrl
+    if (cleanUrl.includes('player.vimeo.com')) {
+      return cleanUrl.split('#')[0]
     }
     
     // Arquivo local ou outro formato - retorna como está
@@ -1508,14 +1514,45 @@ function App() {
           Objetivo: Criar desejo pelo resultado final
           Elemento visual: Carrossel com ambientes premium (9:16 - vertical)
       */}
-      <section className="py-24 md:py-32 px-4 bg-gradient-to-b from-white via-neutral-50/50 to-white relative overflow-hidden">
-        {/* Elementos decorativos de fundo */}
+      <section className="py-24 md:py-32 px-4 bg-gradient-to-br from-white via-neutral-50/30 via-blue-50/20 to-white relative overflow-hidden">
+        {/* Elementos decorativos de fundo - Design Premium */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Círculos decorativos */}
-          <div className="absolute top-20 left-10 w-72 h-72 bg-[#1B4B7B]/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2a6ba8]/5 rounded-full blur-3xl"></div>
-          {/* Linhas decorativas */}
-          <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1B4B7B]/10 to-transparent"></div>
+          {/* Grid pattern sutil */}
+          <div 
+            className="absolute inset-0 opacity-[0.02]"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, #1B4B7B 1px, transparent 1px),
+                linear-gradient(to bottom, #1B4B7B 1px, transparent 1px)
+              `,
+              backgroundSize: '50px 50px'
+            }}
+          ></div>
+          
+          {/* Círculos decorativos com gradiente */}
+          <div className="absolute top-10 left-5 w-96 h-96 bg-gradient-to-br from-[#1B4B7B]/8 via-[#2a6ba8]/6 to-transparent rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute top-1/3 right-10 w-[500px] h-[500px] bg-gradient-to-br from-[#2a6ba8]/6 via-[#1B4B7B]/4 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-5 w-80 h-80 bg-gradient-to-tl from-[#1B4B7B]/8 via-[#2a6ba8]/5 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-gradient-to-tr from-[#2a6ba8]/7 to-transparent rounded-full blur-3xl"></div>
+          
+          {/* Linhas decorativas diagonais */}
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1B4B7B]/8 to-transparent transform -rotate-3"></div>
+            <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1B4B7B]/10 to-transparent"></div>
+            <div className="absolute bottom-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#2a6ba8]/8 to-transparent transform rotate-2"></div>
+          </div>
+          
+          {/* Formas geométricas sutis */}
+          <div className="absolute top-20 right-20 w-32 h-32 border border-[#1B4B7B]/5 rounded-3xl transform rotate-45 blur-sm"></div>
+          <div className="absolute bottom-32 left-20 w-24 h-24 border border-[#2a6ba8]/5 rounded-2xl transform -rotate-12 blur-sm"></div>
+          
+          {/* Efeito de brilho central */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(27, 75, 123, 0.15) 0%, rgba(27, 75, 123, 0.05) 40%, transparent 70%)'
+            }}
+          ></div>
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">

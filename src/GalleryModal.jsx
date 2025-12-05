@@ -104,16 +104,6 @@ function GalleryModal({
               }}
             />
           </div>
-          
-          {/* Nome do projeto - Premium */}
-          {currentImage.nome && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/15 backdrop-blur-xl px-8 py-4 rounded-2xl border-2 border-white/30 shadow-2xl transform transition-all duration-500 hover:scale-105 z-20">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#1B4B7B] to-[#2a6ba8] animate-pulse"></div>
-                <p className="text-white font-bold text-xl drop-shadow-lg">{currentImage.nome}</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Botão anterior - Premium */}
