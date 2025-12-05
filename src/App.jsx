@@ -1939,7 +1939,14 @@ function App() {
                 Voa Negocio
               </span>
               <span className="text-neutral-600">e</span>
-              <span className="text-white font-semibold">Victor</span>
+              <a
+                href="https://almavictor.digital"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white font-semibold hover:text-[#2a6ba8] transition-colors duration-300"
+              >
+                Victor
+              </a>
             </div>
           </div>
         </div>
