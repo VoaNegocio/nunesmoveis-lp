@@ -189,31 +189,6 @@ function App() {
            videoUrl.includes('vimeo.com/')
   }
 
-  // ============================================
-  // MAPA DE ÍCONES
-  // ============================================
-  // Mapeia nomes de ícones para componentes React
-  // Usado para renderizar ícones dinamicamente na seção de diferenciais
-  const iconMap = {
-    award: FiAward,        // Ícone de prêmio/troféu
-    target: FiTarget,      // Ícone de alvo/mira
-    tool: FiTool,          // Ícone de ferramenta
-    creditCard: FiCreditCard, // Ícone de cartão de crédito
-    clipboard: FiClipboard,     // Ícone de prancheta
-    users: FiUsers         // Ícone de usuários/atendimento
-  }
-
-  // ============================================
-  // DADOS: DIFERENCIAIS
-  // ============================================
-  // Array com os diferenciais da empresa (reduzido - apenas atendimento com design de interiores)
-  const diferenciais = [
-    {
-      titulo: 'Atendimento com Design de Interiores',
-      descricao: 'Atendimento realizado por designers de interiores especializados, transformando seu projeto em uma experiência exclusiva e personalizada',
-      iconName: 'users' // Referência ao iconMap
-    },
-  ]
   
   // ============================================
   // DADOS: GALERIA DE IMAGENS POR CATEGORIA
@@ -702,13 +677,15 @@ function App() {
         {/* VERSÃO MOBILE - Hero Section Alternativa */}
         <div className="md:hidden relative z-10 w-full px-4 py-8">
           <div className="space-y-6">
-            {/* Badge "38 anos" em destaque */}
+            {/* Logo em destaque */}
             <div className="text-center">
-              <span className="inline-block px-6 py-3 bg-white/95 backdrop-blur-sm border-2 border-white/60 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-                <span className="bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] bg-clip-text text-transparent text-2xl font-extrabold">
-                  38 anos
-                </span>
-              </span>
+              <div className="inline-block bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <img
+                  src="/LOGO NUNES.png"
+                  alt="Nunes Móveis - Móveis Planejados"
+                  className="h-10 md:h-14 w-auto object-contain"
+                />
+              </div>
             </div>
 
             {/* Título principal - Mais direto e impactante */}
@@ -771,12 +748,14 @@ function App() {
               {/* Título principal - Hierarquia visual forte e premium */}
               <div className="space-y-6 md:space-y-8">
                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
-                  {/* Destaque para "38 anos" com background premium e efeito de brilho */}
-                  <span className="inline-block mb-3 md:mb-4 px-6 md:px-8 py-2 md:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/60 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.2)] font-extrabold">
-                    <span className="bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(27,75,123,0.5)]">
-                      38 anos
-                    </span>
-                  </span>
+                  {/* Logo em destaque com background premium */}
+                  <div className="inline-block mb-3 md:mb-4 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                    <img
+                      src="/LOGO NUNES.png"
+                      alt="Nunes Móveis - Móveis Planejados"
+                      className="h-10 md:h-14 w-auto object-contain"
+                    />
+                  </div>
                   {/* Resto do título com sombra premium e contraste elevado */}
                   <span className="block text-white font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] [text-shadow:_2px_2px_8px_rgba(0,0,0,0.9)]">
                     Transformando ambientes com móveis planejados de alto padrão.
@@ -808,14 +787,17 @@ function App() {
                   </div>
                 </div>
                 
-                {/* Badge 2: Atendimento especializado */}
+                {/* Badge 2: Alta qualidade */}
                 <div className="group flex items-start gap-4 bg-white/90 backdrop-blur-md border border-white/20 rounded-2xl px-6 py-5 shadow-xl hover:bg-white/95 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
                   <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#1B4B7B]/10 flex items-center justify-center group-hover:bg-[#1B4B7B]/20 transition-colors">
-                    <FiUsers className="w-6 h-6 text-[#1B4B7B]" />
+                    <FiAward className="w-6 h-6 text-[#1B4B7B]" />
                   </div>
-                  <div>
-                    <p className="text-neutral-800 font-semibold text-base leading-snug">
-                      Atendimento personalizado e direto com designers de interiores.
+                  <div className="flex-1">
+                    <p className="text-neutral-800 font-bold text-base leading-tight mb-1">
+                      Alta qualidade:
+                    </p>
+                    <p className="text-[#1B4B7B] font-extrabold text-lg leading-tight">
+                      100% MDF
                     </p>
                   </div>
                 </div>
@@ -877,20 +859,12 @@ function App() {
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">
-          {/* Título da seção - Design premium */}
+          {/* Título da seção - Design premium com background azul sutil */}
           <div className="text-center mb-16 md:mb-20">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight tracking-tight">
-              <span className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent">
-                Diferenciais que transformam
-              </span>
-              <br />
-              <span className="text-[#1B4B7B]">a Nunes na melhor escolha.</span>
-            </h2>
-            {/* Linha decorativa sutil */}
-            <div className="flex items-center justify-center gap-4 mt-8">
-              <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#1B4B7B]/30"></div>
-              <div className="w-2 h-2 rounded-full bg-[#1B4B7B]"></div>
-              <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#1B4B7B]/30"></div>
+            <div className="inline-block bg-gradient-to-r from-[#1B4B7B]/20 via-[#1B4B7B]/15 to-[#2a6ba8]/20 backdrop-blur-sm px-8 md:px-12 py-6 md:py-8 rounded-2xl border border-[#1B4B7B]/30 shadow-lg">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1B4B7B] leading-tight tracking-tight">
+                Atendimento com Designers de Interiores: Diferencial que transforma a Nunes Móveis na melhor escolha.
+              </h2>
             </div>
           </div>
 
@@ -1059,47 +1033,6 @@ function App() {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Card único de diferencial - Design premium */}
-          <div className="flex justify-center mt-16 md:mt-20 mb-16 md:mb-20">
-            {diferenciais.map((diferencial, index) => {
-              const IconComponent = iconMap[diferencial.iconName]
-              
-              if (!IconComponent) {
-                return null
-              }
-              
-              return (
-                <div
-                  key={index}
-                  className="group relative bg-white p-10 md:p-12 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden w-full max-w-2xl"
-                >
-                  {/* Efeito de brilho sutil no hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
-                  
-                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                    {/* Container do ícone */}
-                    <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1B4B7B]/10 to-[#1B4B7B]/5 flex items-center justify-center group-hover:from-[#1B4B7B]/20 group-hover:to-[#1B4B7B]/10 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
-                      <IconComponent className="w-12 h-12 text-[#1B4B7B] group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    
-                    {/* Texto */}
-                    <div className="flex-1 text-center md:text-left">
-                      <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4 group-hover:text-[#1B4B7B] transition-colors duration-300">
-                        {diferencial.titulo}
-                      </h3>
-                      <p className="text-neutral-600 leading-relaxed text-lg group-hover:text-neutral-700 transition-colors duration-300">
-                        {diferencial.descricao}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Linha decorativa no hover */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
-                </div>
-              )
-            })}
           </div>
 
           {/* CTA da seção - Design premium */}
@@ -1903,9 +1836,14 @@ function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             {/* Coluna 1: Sobre a empresa */}
             <div className="lg:col-span-1">
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-neutral-300 bg-clip-text text-transparent">
-                Nunes Móveis
-              </h3>
+              {/* Logo com fundo branco para melhor visibilidade */}
+              <div className="mb-6 inline-block bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <img
+                  src="/LOGO NUNES.png"
+                  alt="Nunes Móveis - Móveis Planejados"
+                  className="h-10 md:h-14 w-auto object-contain"
+                />
+              </div>
               <p className="text-neutral-400 leading-relaxed text-sm">
                 38 anos transformando ambientes com móveis planejados de alto padrão em Uberaba, MG.
               </p>
