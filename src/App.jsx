@@ -128,6 +128,63 @@ function App() {
       imagem: '/carrossel/img5.png'
     },
   ]
+  
+  // ============================================
+  // DADOS: VÍDEO DA SECTION 4 (OPCIONAL)
+  // ============================================
+  // URL do vídeo para a Section 4 (Carrossel de Ambientes)
+  // Se definido, o vídeo será exibido ao invés do carrossel
+  // Suporta: YouTube, Vimeo, ou arquivos locais (MP4, WebM, etc)
+  // Formato YouTube: 'https://www.youtube.com/watch?v=VIDEO_ID' ou 'https://youtu.be/VIDEO_ID'
+  // Formato Vimeo: 'https://vimeo.com/VIDEO_ID'
+  // Arquivo local: '/video-nunes-moveis-lp.mp4' (colocar na pasta public/)
+  const section4Video = '/video-nunes-moveis-lp.mp4' // Vídeo da Nunes Móveis - Section 4
+  
+  // Função para detectar tipo de vídeo e retornar URL formatada (Section 4)
+  const getSection4VideoEmbedUrl = (videoUrl) => {
+    if (!videoUrl) return null
+    
+    // YouTube - formato youtu.be
+    if (videoUrl.includes('youtu.be/')) {
+      const videoId = videoUrl.split('youtu.be/')[1].split('?')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    
+    // YouTube - formato youtube.com/watch
+    if (videoUrl.includes('youtube.com/watch')) {
+      const videoId = videoUrl.split('v=')[1].split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    
+    // YouTube - já está em formato embed
+    if (videoUrl.includes('youtube.com/embed')) {
+      return videoUrl
+    }
+    
+    // Vimeo - formato vimeo.com
+    if (videoUrl.includes('vimeo.com/')) {
+      const videoId = videoUrl.split('vimeo.com/')[1].split('?')[0]
+      return `https://player.vimeo.com/video/${videoId}`
+    }
+    
+    // Vimeo - já está em formato player
+    if (videoUrl.includes('player.vimeo.com')) {
+      return videoUrl
+    }
+    
+    // Arquivo local ou outro formato - retorna como está
+    return videoUrl
+  }
+  
+  // Função para detectar se é vídeo embed (YouTube/Vimeo) ou arquivo (Section 4)
+  const isSection4EmbedVideo = (videoUrl) => {
+    if (!videoUrl) return false
+    return videoUrl.includes('youtube.com/embed') || 
+           videoUrl.includes('player.vimeo.com') ||
+           videoUrl.includes('youtu.be') ||
+           videoUrl.includes('youtube.com/watch') ||
+           videoUrl.includes('vimeo.com/')
+  }
 
   // ============================================
   // MAPA DE ÍCONES
@@ -213,6 +270,75 @@ function App() {
       nome: 'Cozinha'
     },
   ]
+  
+  // ============================================
+  // DADOS: VÍDEOS POR CATEGORIA (OPCIONAL)
+  // ============================================
+  // URLs de vídeos para cada categoria
+  // Se definido, o vídeo será exibido ao invés do carrossel
+  // Suporta: YouTube, Vimeo, ou arquivos locais (MP4, WebM, etc)
+  // Formato YouTube: 'https://www.youtube.com/embed/VIDEO_ID' ou 'https://youtu.be/VIDEO_ID'
+  // Formato Vimeo: 'https://player.vimeo.com/video/VIDEO_ID'
+  // Arquivo local: '/videos/nome-do-video.mp4'
+  const banheiroVideo = null // Exemplo: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+  const salaVideo = null // Exemplo: 'https://player.vimeo.com/video/123456789'
+  const cozinhaVideo = null // Exemplo: '/videos/cozinha.mp4'
+  
+  // Função para obter vídeo da categoria ativa
+  const getActiveVideo = () => {
+    switch(activeTab) {
+      case 'banheiro': return banheiroVideo
+      case 'sala': return salaVideo
+      case 'cozinha': return cozinhaVideo
+      default: return null
+    }
+  }
+  
+  // Função para detectar tipo de vídeo e retornar URL formatada
+  const getVideoEmbedUrl = (videoUrl) => {
+    if (!videoUrl) return null
+    
+    // YouTube - formato youtu.be
+    if (videoUrl.includes('youtu.be/')) {
+      const videoId = videoUrl.split('youtu.be/')[1].split('?')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    
+    // YouTube - formato youtube.com/watch
+    if (videoUrl.includes('youtube.com/watch')) {
+      const videoId = videoUrl.split('v=')[1].split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    
+    // YouTube - já está em formato embed
+    if (videoUrl.includes('youtube.com/embed')) {
+      return videoUrl
+    }
+    
+    // Vimeo - formato vimeo.com
+    if (videoUrl.includes('vimeo.com/')) {
+      const videoId = videoUrl.split('vimeo.com/')[1].split('?')[0]
+      return `https://player.vimeo.com/video/${videoId}`
+    }
+    
+    // Vimeo - já está em formato player
+    if (videoUrl.includes('player.vimeo.com')) {
+      return videoUrl
+    }
+    
+    // Arquivo local ou outro formato - retorna como está
+    return videoUrl
+  }
+  
+  // Função para detectar se é vídeo embed (YouTube/Vimeo) ou arquivo
+  const isEmbedVideo = (videoUrl) => {
+    if (!videoUrl) return false
+    return videoUrl.includes('youtube.com/embed') || 
+           videoUrl.includes('player.vimeo.com') ||
+           videoUrl.includes('youtu.be') ||
+           videoUrl.includes('youtube.com/watch') ||
+           videoUrl.includes('vimeo.com/')
+  }
   
   // Função para obter imagens da categoria ativa
   const getActiveImages = () => {
@@ -826,71 +952,104 @@ function App() {
                 </button>
               </div>
               
-              {/* Carrossel da categoria ativa */}
+              {/* Vídeo ou Carrossel da categoria ativa */}
               <div className="relative">
-                <div className="overflow-hidden rounded-2xl bg-neutral-100">
-                  <div
-                    className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${getActiveCurrentIndex() * 100}%)` }}
-                  >
-                    {getActiveImages().map((imagem, index) => (
-                      <div
-                        key={index}
-                        className="min-w-full relative group cursor-pointer"
-                        onClick={() => openActiveModal(index)}
-                      >
-                        <img
-                          src={imagem.src}
-                          alt={imagem.alt}
-                          className="w-full h-[400px] md:h-[500px] object-cover group-hover:opacity-90 transition-opacity"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 pointer-events-none">
-                          <p className="text-white font-semibold text-lg">{imagem.nome}</p>
-                        </div>
+                {getActiveVideo() ? (
+                  /* Exibe vídeo se disponível */
+                  <div className="overflow-hidden rounded-2xl bg-neutral-100">
+                    {isEmbedVideo(getActiveVideo()) ? (
+                      /* Vídeo embed (YouTube/Vimeo) */
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          src={getVideoEmbedUrl(getActiveVideo())}
+                          className="absolute top-0 left-0 w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={`Vídeo ${activeTab}`}
+                        ></iframe>
                       </div>
-                    ))}
+                    ) : (
+                      /* Vídeo local (MP4, WebM, etc) */
+                      <video
+                        className="w-full h-[400px] md:h-[500px] object-cover"
+                        controls
+                        playsInline
+                      >
+                        <source src={getActiveVideo()} type="video/mp4" />
+                        <source src={getActiveVideo()} type="video/webm" />
+                        Seu navegador não suporta o elemento de vídeo.
+                      </video>
+                    )}
                   </div>
-                </div>
-
-                {/* Botões de navegação */}
-                {getActiveImages().length > 1 && (
+                ) : (
+                  /* Exibe carrossel se não houver vídeo */
                   <>
-                    <button
-                      onClick={prevActiveImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                      aria-label="Imagem anterior"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    
-                    <button
-                      onClick={nextActiveImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                      aria-label="Próxima imagem"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </>
-                )}
+                    <div className="overflow-hidden rounded-2xl bg-neutral-100">
+                      <div
+                        className="flex transition-transform duration-500 ease-in-out"
+                        style={{ transform: `translateX(-${getActiveCurrentIndex() * 100}%)` }}
+                      >
+                        {getActiveImages().map((imagem, index) => (
+                          <div
+                            key={index}
+                            className="min-w-full relative group cursor-pointer"
+                            onClick={() => openActiveModal(index)}
+                          >
+                            <img
+                              src={imagem.src}
+                              alt={imagem.alt}
+                              className="w-full h-[400px] md:h-[500px] object-cover group-hover:opacity-90 transition-opacity"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 pointer-events-none">
+                              <p className="text-white font-semibold text-lg">{imagem.nome}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-                {/* Indicadores */}
-                {getActiveImages().length > 1 && (
-                  <div className="flex justify-center gap-2 mt-6">
-                    {getActiveImages().map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setActiveCurrentIndex(index)}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          index === getActiveCurrentIndex() ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
-                        }`}
-                        aria-label={`Ir para imagem ${index + 1}`}
-                      />
-                    ))}
-                  </div>
+                    {/* Botões de navegação */}
+                    {getActiveImages().length > 1 && (
+                      <>
+                        <button
+                          onClick={prevActiveImage}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                          aria-label="Imagem anterior"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        
+                        <button
+                          onClick={nextActiveImage}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                          aria-label="Próxima imagem"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
+
+                    {/* Indicadores */}
+                    {getActiveImages().length > 1 && (
+                      <div className="flex justify-center gap-2 mt-6">
+                        {getActiveImages().map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setActiveCurrentIndex(index)}
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              index === getActiveCurrentIndex() ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
+                            }`}
+                            aria-label={`Ir para imagem ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -1349,109 +1508,234 @@ function App() {
           Objetivo: Criar desejo pelo resultado final
           Elemento visual: Carrossel com ambientes premium (9:16 - vertical)
       */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          {/* Cabeçalho da seção */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
-              Vamos transformar seu ambiente?
+      <section className="py-24 md:py-32 px-4 bg-gradient-to-b from-white via-neutral-50/50 to-white relative overflow-hidden">
+        {/* Elementos decorativos de fundo */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Círculos decorativos */}
+          <div className="absolute top-20 left-10 w-72 h-72 bg-[#1B4B7B]/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#2a6ba8]/5 rounded-full blur-3xl"></div>
+          {/* Linhas decorativas */}
+          <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1B4B7B]/10 to-transparent"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Cabeçalho da seção - Design Premium */}
+          <div className="text-center mb-16 md:mb-20">
+            {/* Badge decorativo */}
+            <div className="inline-block mb-6">
+              <span className="inline-block px-6 py-2 bg-gradient-to-r from-[#1B4B7B]/10 via-[#2a6ba8]/15 to-[#1B4B7B]/10 backdrop-blur-sm border-2 border-[#1B4B7B]/20 rounded-full shadow-lg">
+                <span className="bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] bg-clip-text text-transparent font-bold text-sm md:text-base">
+                  Transformação de Ambientes
+                </span>
+              </span>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight tracking-tight">
+              <span className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent">
+                Vamos transformar
+              </span>
+              <br />
+              <span className="text-[#1B4B7B]">seu ambiente?</span>
             </h2>
-            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
-              Fale agora com uma de nossas designers de interiores e comece a planejar um espaço que reflete seu estilo, com qualidade, precisão e entrega garantida.
+            
+            {/* Linha decorativa sutil */}
+            <div className="flex items-center justify-center gap-4 mt-8 mb-6">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#1B4B7B]/30"></div>
+              <div className="w-2 h-2 rounded-full bg-[#1B4B7B]"></div>
+              <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#1B4B7B]/30"></div>
+            </div>
+            
+            <p className="text-lg md:text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
+              Fale agora com uma de nossas <span className="font-semibold text-[#1B4B7B]">designers de interiores</span> e comece a planejar um espaço que reflete seu estilo, com qualidade, precisão e entrega garantida.
             </p>
           </div>
 
-          {/* Carrossel de ambientes */}
-          <div className="relative max-w-md mx-auto mb-12">
-            {/* Container do carrossel com proporção 9:16 (vertical) */}
-            <div className="relative overflow-hidden rounded-2xl bg-neutral-100 aspect-[9/16]">
-              {/* Container dos slides com animação de transição */}
-              <div
-                className="flex transition-transform duration-500 ease-in-out h-full"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-              >
-                {/* Mapeia cada ambiente e cria um slide */}
-                {ambientes.map((ambiente, index) => (
-                  <div
-                    key={index}
-                    className="min-w-full relative h-full bg-gradient-to-br from-blue-50 via-neutral-100 to-blue-50 cursor-pointer group"
-                    onClick={() => openAmbienteModal(index)}
-                  >
-                    {/* Se a imagem não falhou ao carregar, mostra a imagem */}
-                    {!imageErrors.includes(index) ? (
-                      <img
-                        src={ambiente.imagem}
-                        alt={ambiente.nome}
-                        className="w-full h-full object-cover object-center group-hover:opacity-90 transition-opacity"
-                        onError={() => {
-                          // Se a imagem falhar, adiciona o índice ao array de erros
-                          setImageErrors(prev => [...prev, index])
-                        }}
-                      />
-                    ) : (
-                      // Placeholder caso a imagem não carregue
-                      <div className="absolute inset-0 flex items-center justify-center p-12">
-                        <div className="text-center">
-                          <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-[#1B4B7B]/10 flex items-center justify-center">
-                            <FiHome className="w-12 h-12 text-[#1B4B7B]" />
-                          </div>
-                          <h3 className="text-3xl font-bold text-neutral-800 mb-2">{ambiente.nome}</h3>
-                          <p className="text-neutral-600 text-lg">{ambiente.descricao}</p>
-                        </div>
-                      </div>
-                    )}
+          {/* Vídeo ou Carrossel de ambientes */}
+          <div className="relative max-w-md mx-auto mb-16 md:mb-20">
+            {section4Video ? (
+              /* Exibe vídeo se disponível - Design Premium */
+              <div className="relative group">
+                {/* Container principal com efeitos premium */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 aspect-[9/16] shadow-2xl shadow-[#1B4B7B]/20 border-4 border-white/10 group-hover:border-white/20 transition-all duration-500">
+                  {/* Overlay sutil no hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10"></div>
+                  
+                  {/* Efeito de brilho nas bordas */}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-transparent via-[#1B4B7B]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10"></div>
+                  
+                  {isSection4EmbedVideo(section4Video) ? (
+                    /* Vídeo embed (YouTube/Vimeo) - Premium */
+                    <div className="relative w-full h-full">
+                      <iframe
+                        src={getSection4VideoEmbedUrl(section4Video)}
+                        className="absolute top-0 left-0 w-full h-full rounded-3xl"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Vídeo Nunes Móveis"
+                      ></iframe>
+                    </div>
+                  ) : (
+                    /* Vídeo local (MP4, WebM, etc) - Premium */
+                    <div className="relative w-full h-full">
+                      <video
+                        className="w-full h-full object-cover rounded-3xl"
+                        controls
+                        playsInline
+                        controlsList="nodownload"
+                      >
+                        <source src={section4Video} type="video/mp4" />
+                        <source src={section4Video} type="video/webm" />
+                        Seu navegador não suporta o elemento de vídeo.
+                      </video>
+                      
+                      {/* Overlay decorativo superior */}
+                      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/30 via-black/10 to-transparent pointer-events-none z-10 rounded-t-3xl"></div>
+                      
+                      {/* Overlay decorativo inferior */}
+                      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/30 via-black/10 to-transparent pointer-events-none z-10 rounded-b-3xl"></div>
+                    </div>
+                  )}
+                  
+                  {/* Badge premium no canto superior direito */}
+                  <div className="absolute top-4 right-4 z-20 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-lg">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                      <span className="text-white text-sm font-semibold">Vídeo</span>
+                    </div>
                   </div>
-                ))}
+                </div>
+                
+                {/* Sombra decorativa externa */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#1B4B7B]/20 via-[#2a6ba8]/20 to-[#1B4B7B]/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               </div>
-            </div>
+            ) : (
+              /* Exibe carrossel se não houver vídeo */
+              <>
+                {/* Container do carrossel com proporção 9:16 (vertical) - Design Premium */}
+                <div className="relative group">
+                  {/* Container principal com efeitos premium */}
+                  <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 aspect-[9/16] shadow-2xl shadow-[#1B4B7B]/20 border-4 border-white/10 group-hover:border-white/20 transition-all duration-500">
+                    {/* Container dos slides com animação de transição */}
+                    <div
+                      className="flex transition-transform duration-500 ease-in-out h-full"
+                      style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                    >
+                      {/* Mapeia cada ambiente e cria um slide */}
+                      {ambientes.map((ambiente, index) => (
+                        <div
+                          key={index}
+                          className="min-w-full relative h-full bg-gradient-to-br from-blue-50 via-neutral-100 to-blue-50 cursor-pointer group/item"
+                          onClick={() => openAmbienteModal(index)}
+                        >
+                          {/* Overlay sutil no hover */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity duration-500 pointer-events-none z-10"></div>
+                          
+                          {/* Se a imagem não falhou ao carregar, mostra a imagem */}
+                          {!imageErrors.includes(index) ? (
+                            <img
+                              src={ambiente.imagem}
+                              alt={ambiente.nome}
+                              className="w-full h-full object-cover object-center group-hover/item:scale-105 transition-transform duration-700"
+                              onError={() => {
+                                // Se a imagem falhar, adiciona o índice ao array de erros
+                                setImageErrors(prev => [...prev, index])
+                              }}
+                            />
+                          ) : (
+                            // Placeholder caso a imagem não carregue
+                            <div className="absolute inset-0 flex items-center justify-center p-12">
+                              <div className="text-center">
+                                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-[#1B4B7B]/10 flex items-center justify-center">
+                                  <FiHome className="w-12 h-12 text-[#1B4B7B]" />
+                                </div>
+                                <h3 className="text-3xl font-bold text-neutral-800 mb-2">{ambiente.nome}</h3>
+                                <p className="text-neutral-600 text-lg">{ambiente.descricao}</p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Badge com nome do ambiente no hover */}
+                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500 z-20">
+                            <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20 shadow-lg">
+                              <p className="text-white font-semibold text-lg">{ambiente.nome}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Sombra decorativa externa */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#1B4B7B]/20 via-[#2a6ba8]/20 to-[#1B4B7B]/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                </div>
 
-            {/* Botão de navegação: Slide anterior */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-              aria-label="Slide anterior"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            {/* Botão de navegação: Próximo slide */}
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-              aria-label="Próximo slide"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Indicadores de slide (dots) */}
-            <div className="flex justify-center gap-2 mt-4">
-              {ambientes.map((_, index) => (
+                {/* Botão de navegação: Slide anterior - Premium */}
                 <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentSlide ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
-                  }`}
-                  aria-label={`Ir para slide ${index + 1}`}
-                />
-              ))}
-            </div>
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white backdrop-blur-md text-[#1B4B7B] p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border-2 border-white/50 hover:border-[#1B4B7B]/30 z-20 group/btn"
+                  aria-label="Slide anterior"
+                >
+                  <svg className="w-6 h-6 group-hover/btn:translate-x-[-2px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                {/* Botão de navegação: Próximo slide - Premium */}
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white backdrop-blur-md text-[#1B4B7B] p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border-2 border-white/50 hover:border-[#1B4B7B]/30 z-20 group/btn"
+                  aria-label="Próximo slide"
+                >
+                  <svg className="w-6 h-6 group-hover/btn:translate-x-[2px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                {/* Indicadores de slide (dots) - Premium */}
+                <div className="flex justify-center gap-2 mt-6">
+                  {ambientes.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                        index === currentSlide 
+                          ? 'w-10 bg-gradient-to-r from-[#1B4B7B] to-[#2a6ba8] shadow-lg shadow-[#1B4B7B]/50' 
+                          : 'w-2.5 bg-neutral-300 hover:bg-neutral-400'
+                      }`}
+                      aria-label={`Ir para slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* CTA da seção */}
-          <div className="text-center">
+          {/* CTA da seção - Design Premium */}
+          <div className="text-center mt-16 md:mt-20">
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-[#1B4B7B] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#153a5f] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#1B4B7B] via-[#2a6ba8] to-[#1B4B7B] text-white px-10 py-5 rounded-2xl font-bold text-lg md:text-xl hover:from-[#153a5f] hover:via-[#1B4B7B] hover:to-[#153a5f] transition-all duration-500 shadow-2xl shadow-[#1B4B7B]/30 hover:shadow-[#1B4B7B]/50 transform hover:-translate-y-2 hover:scale-105 relative overflow-hidden"
             >
-              Comece seu projeto com a gente
+              {/* Efeito de brilho animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              
+              <span className="relative z-10 drop-shadow-sm">Comece seu projeto com a gente</span>
+              
+              {/* Ícone de seta */}
+              <svg className="w-6 h-6 relative z-10 group-hover:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </a>
+            
+            {/* Texto de apoio */}
+            <p className="mt-6 text-sm md:text-base text-neutral-500">
+              Atendimento personalizado e consultoria gratuita
+            </p>
           </div>
         </div>
       </section>
