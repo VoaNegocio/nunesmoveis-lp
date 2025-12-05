@@ -8,6 +8,7 @@
 // Imports do React e bibliotecas
 import { useState, useEffect } from 'react' // Hooks para gerenciar estado e efeitos
 import { FiStar, FiUsers, FiHome, FiAward, FiTarget, FiTool, FiCreditCard, FiClipboard } from 'react-icons/fi' // Ícones premium do Feather Icons
+import GalleryModal from './GalleryModal' // Componente do modal da galeria
 import './App.css' // Estilos customizados
 
 /**
@@ -30,6 +31,17 @@ function App() {
   const [googleReviews, setGoogleReviews] = useState([])
   const [googleRating, setGoogleRating] = useState(4.9) // Nota média do Google
   const [isLoadingReviews, setIsLoadingReviews] = useState(false)
+  
+  // Estado para galeria com modal (Seção 2)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null) // Índice da imagem selecionada no modal
+  const [galleryCurrentIndex, setGalleryCurrentIndex] = useState(0) // Índice atual do carrossel da galeria
+  
+  // Estado para modal do carrossel de ambientes (Seção 4)
+  const [selectedAmbienteIndex, setSelectedAmbienteIndex] = useState(null) // Índice do ambiente selecionado no modal
+  const [ambienteModalIndex, setAmbienteModalIndex] = useState(0) // Índice atual no modal de ambientes
+  
+  // Estado para carrossel de depoimentos (Seção 3 - Mobile)
+  const [depoimentoSlide, setDepoimentoSlide] = useState(0) // Índice atual do carrossel de depoimentos
   
   // ============================================
   // CONFIGURAÇÕES E DADOS
@@ -125,40 +137,100 @@ function App() {
   // ============================================
   // DADOS: DIFERENCIAIS
   // ============================================
-  // Array com os diferenciais da empresa
-  // Cada item tem título, descrição e nome do ícone (que é mapeado no iconMap)
+  // Array com os diferenciais da empresa (reduzido - apenas atendimento com design de interiores)
   const diferenciais = [
     {
-      titulo: 'Materiais Premium',
-      descricao: 'Materiais de alta durabilidade e acabamentos premium',
-      iconName: 'award' // Referência ao iconMap
-    },
-    {
-      titulo: 'Design Inteligente',
-      descricao: 'Aproveitamento máximo do espaço com design inteligente',
-      iconName: 'target'
-    },
-    {
-      titulo: 'Montagem Profissional',
-      descricao: 'Montagem precisa, feita por profissionais especializados',
-      iconName: 'tool'
-    },
-    {
-      titulo: 'Pagamento Facilitado',
-      descricao: 'Condições de pagamento facilitadas',
-      iconName: 'creditCard'
-    },
-    {
-      titulo: 'Acompanhamento Completo',
-      descricao: 'Acompanhamento completo em todas as etapas',
-      iconName: 'clipboard'
-    },
-    {
-      titulo: 'Atendimento Exclusivo',
-      descricao: 'Atendimento que se torna uma experiência exclusiva e personalizada',
-      iconName: 'users'
+      titulo: 'Atendimento com Design de Interiores',
+      descricao: 'Atendimento realizado por designers de interiores especializados, transformando seu projeto em uma experiência exclusiva e personalizada',
+      iconName: 'users' // Referência ao iconMap
     },
   ]
+  
+  // ============================================
+  // DADOS: GALERIA DE IMAGENS
+  // ============================================
+  // Array com as imagens da galeria
+  const galeriaImagens = [
+    { 
+      src: '/carrossel/img1.png', 
+      alt: 'Projeto de móveis planejados - Sala',
+      nome: 'Sala'
+    },
+    { 
+      src: '/carrossel/img2.png', 
+      alt: 'Projeto de móveis planejados - Cozinha',
+      nome: 'Cozinha'
+    },
+    { 
+      src: '/carrossel/img4.png', 
+      alt: 'Projeto de móveis planejados - Closet',
+      nome: 'Closet'
+    },
+    { 
+      src: '/carrossel/img5.png', 
+      alt: 'Projeto de móveis planejados - Área Gourmet',
+      nome: 'Área Gourmet'
+    },
+    { 
+      src: '/carrossel/img6.png', 
+      alt: 'Projeto de móveis planejados - Ambiente Premium',
+      nome: 'Ambiente Premium'
+    },
+  ]
+  
+  // Funções para navegação da galeria
+  const nextGalleryImage = () => {
+    setGalleryCurrentIndex((prev) => (prev + 1) % galeriaImagens.length)
+  }
+  
+  const prevGalleryImage = () => {
+    setGalleryCurrentIndex((prev) => (prev - 1 + galeriaImagens.length) % galeriaImagens.length)
+  }
+  
+  // Função para abrir modal
+  const openModal = (index) => {
+    setSelectedImageIndex(index)
+    setGalleryCurrentIndex(index)
+  }
+  
+  // Função para fechar modal
+  const closeModal = () => {
+    setSelectedImageIndex(null)
+  }
+  
+  // Funções para modal do carrossel de ambientes (Seção 4)
+  const openAmbienteModal = (index) => {
+    setSelectedAmbienteIndex(index)
+    setAmbienteModalIndex(index)
+  }
+  
+  const closeAmbienteModal = () => {
+    setSelectedAmbienteIndex(null)
+  }
+  
+  const nextAmbienteModal = () => {
+    setAmbienteModalIndex((prev) => (prev + 1) % ambientes.length)
+  }
+  
+  const prevAmbienteModal = () => {
+    setAmbienteModalIndex((prev) => (prev - 1 + ambientes.length) % ambientes.length)
+  }
+  
+  // Funções para navegação do carrossel de depoimentos (Mobile)
+  const nextDepoimento = () => {
+    setDepoimentoSlide((prev) => (prev + 1) % depoimentos.length)
+  }
+  
+  const prevDepoimento = () => {
+    setDepoimentoSlide((prev) => (prev - 1 + depoimentos.length) % depoimentos.length)
+  }
+  
+  // Converter ambientes para formato do modal
+  const ambientesParaModal = ambientes.map(ambiente => ({
+    src: ambiente.imagem,
+    alt: ambiente.descricao,
+    nome: ambiente.nome
+  }))
 
   // ============================================
   // DADOS: DEPOIMENTOS (FALLBACK)
@@ -419,28 +491,37 @@ function App() {
 
               {/* CTAs (Call to Actions) - Botões principais */}
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                {/* CTA Principal: WhatsApp */}
+                {/* CTA Principal: WhatsApp - Design Premium com Animações */}
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center gap-3 bg-[#1B4B7B] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#153a5f] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
+                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] via-[#20BA5A] to-[#25D366] text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-pulse-slow overflow-hidden"
                 >
-                  {/* Ícone do WhatsApp */}
-                  <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                  {/* Efeito de brilho animado */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
+                  
+                  {/* Anel de pulso animado */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-white/50 animate-ping-slow opacity-75"></div>
+                  
+                  {/* Ícone do WhatsApp com animação */}
+                  <svg className="w-7 h-7 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 relative z-10 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                   </svg>
-                  Fale com uma designer
+                  <span className="relative z-10 drop-shadow-lg font-extrabold tracking-wide">Fale com uma designer</span>
+                  
+                  {/* Efeito de partículas/brilho */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 opacity-50"></div>
                 </a>
                 
                 {/* CTA Secundário: Ver Projetos */}
                 <a
                   href="#diferenciais"
-                  className="group inline-flex items-center justify-center gap-3 bg-white backdrop-blur-md border-2 border-white text-[#1B4B7B] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#1B4B7B] hover:text-white hover:border-[#1B4B7B] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
+                  className="group inline-flex items-center justify-center gap-2 md:gap-3 bg-white backdrop-blur-md border-2 border-white text-[#1B4B7B] px-3 py-2 md:px-6 md:py-3 rounded-xl font-semibold text-base md:text-xl hover:bg-[#1B4B7B] hover:text-white hover:border-[#1B4B7B] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
                 >
                   <span className="drop-shadow-sm">Ver Diferenciais</span>
                   {/* Ícone de seta animada */}
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
@@ -481,13 +562,11 @@ function App() {
             </div>
           </div>
 
-          {/* Grid de cards com diferenciais - Design premium */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 justify-items-center">
+          {/* Card único de diferencial - Design premium */}
+          <div className="flex justify-center mb-16 md:mb-20">
             {diferenciais.map((diferencial, index) => {
-              // Obtém o componente de ícone do mapa
               const IconComponent = iconMap[diferencial.iconName]
               
-              // Se o ícone não existir, não renderiza o card (segurança)
               if (!IconComponent) {
                 return null
               }
@@ -495,31 +574,104 @@ function App() {
               return (
                 <div
                   key={index}
-                  className="group relative bg-white p-8 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden w-full max-w-sm"
+                  className="group relative bg-white p-10 md:p-12 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden w-full max-w-2xl"
                 >
                   {/* Efeito de brilho sutil no hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
                   
-                  {/* Container do ícone com círculo de fundo premium */}
-                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1B4B7B]/10 to-[#1B4B7B]/5 flex items-center justify-center mb-6 group-hover:from-[#1B4B7B]/20 group-hover:to-[#1B4B7B]/10 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
-                    <IconComponent className="w-8 h-8 text-[#1B4B7B] group-hover:scale-110 transition-transform duration-500" />
+                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                    {/* Container do ícone */}
+                    <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1B4B7B]/10 to-[#1B4B7B]/5 flex items-center justify-center group-hover:from-[#1B4B7B]/20 group-hover:to-[#1B4B7B]/10 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                      <IconComponent className="w-12 h-12 text-[#1B4B7B] group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    
+                    {/* Texto */}
+                    <div className="flex-1 text-center md:text-left">
+                      <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4 group-hover:text-[#1B4B7B] transition-colors duration-300">
+                        {diferencial.titulo}
+                      </h3>
+                      <p className="text-neutral-600 leading-relaxed text-lg group-hover:text-neutral-700 transition-colors duration-300">
+                        {diferencial.descricao}
+                      </p>
+                    </div>
                   </div>
-                  
-                  {/* Título do diferencial */}
-                  <h3 className="relative z-10 text-xl md:text-2xl font-bold text-neutral-900 mb-3 group-hover:text-[#1B4B7B] transition-colors duration-300">
-                    {diferencial.titulo}
-                  </h3>
-                  
-                  {/* Descrição do diferencial */}
-                  <p className="relative z-10 text-neutral-600 leading-relaxed text-base group-hover:text-neutral-700 transition-colors duration-300">
-                    {diferencial.descricao}
-                  </p>
                   
                   {/* Linha decorativa no hover */}
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
                 </div>
               )
             })}
+          </div>
+
+          {/* Galeria Carrossel - Design premium */}
+          <div className="mb-16 md:mb-20">
+            <h3 className="text-3xl md:text-4xl font-bold text-neutral-900 text-center mb-12">
+              <span className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent">
+                Nossos Projetos
+              </span>
+            </h3>
+            
+            {/* Carrossel da galeria */}
+            <div className="relative max-w-6xl mx-auto">
+              <div className="overflow-hidden rounded-2xl bg-neutral-100">
+                <div
+                  className="flex transition-transform duration-500 ease-in-out"
+                  style={{ transform: `translateX(-${galleryCurrentIndex * 100}%)` }}
+                >
+                  {galeriaImagens.map((imagem, index) => (
+                    <div
+                      key={index}
+                      className="min-w-full relative group cursor-pointer"
+                      onClick={() => openModal(index)}
+                    >
+                      <img
+                        src={imagem.src}
+                        alt={imagem.alt}
+                        className="w-full h-[400px] md:h-[500px] object-cover group-hover:opacity-90 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 pointer-events-none">
+                        <p className="text-white font-semibold text-lg">{imagem.nome}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Botões de navegação */}
+              <button
+                onClick={prevGalleryImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                aria-label="Imagem anterior"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={nextGalleryImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10"
+                aria-label="Próxima imagem"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Indicadores */}
+              <div className="flex justify-center gap-2 mt-6">
+                {galeriaImagens.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setGalleryCurrentIndex(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      index === galleryCurrentIndex ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
+                    }`}
+                    aria-label={`Ir para imagem ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* CTA da seção - Design premium */}
@@ -538,6 +690,21 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* ============================================
+          MODAL DA GALERIA
+          ============================================
+          Modal premium para exibir imagens em tamanho maior
+      */}
+      <GalleryModal
+        isOpen={selectedImageIndex !== null}
+        onClose={closeModal}
+        images={galeriaImagens}
+        currentIndex={galleryCurrentIndex}
+        onNext={nextGalleryImage}
+        onPrev={prevGalleryImage}
+        onSelectImage={setGalleryCurrentIndex}
+      />
 
       {/* ============================================
           SECTION 3 - PROVA SOCIAL (PREMIUM)
@@ -649,8 +816,151 @@ function App() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {depoimentos.map((depoimento, index) => (
+            <>
+              {/* Carrossel Mobile */}
+              <div className="relative md:hidden mb-8">
+                <div className="overflow-hidden rounded-2xl">
+                  <div
+                    className="flex transition-transform duration-500 ease-in-out"
+                    style={{ transform: `translateX(-${depoimentoSlide * 100}%)` }}
+                  >
+                    {depoimentos.map((depoimento, index) => (
+                      <div key={index} className="min-w-full px-2">
+                        <div className="group relative bg-white p-6 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden">
+                          {/* Efeito de brilho sutil no hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#1B4B7B]/0 via-[#1B4B7B]/0 to-[#1B4B7B]/0 group-hover:from-[#1B4B7B]/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 pointer-events-none"></div>
+                          
+                          {/* Badge do Google (se for review do Google) */}
+                          {depoimento.link && (
+                            <div className="absolute top-4 right-4 z-10">
+                              <a
+                                href={depoimento.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-white/90 backdrop-blur-sm border border-neutral-200 rounded-full text-xs font-medium text-neutral-700 hover:bg-white hover:border-[#1B4B7B]/40 transition-all"
+                                title="Ver no Google"
+                              >
+                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                </svg>
+                                Google
+                              </a>
+                            </div>
+                          )}
+                          
+                          {/* Container do conteúdo */}
+                          <div className="relative z-10">
+                            {/* Estrelas de avaliação - Design premium */}
+                            <div className="flex items-center gap-1 mb-4">
+                              {[...Array(5)].map((_, i) => (
+                                <FiStar
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < depoimento.nota
+                                      ? 'text-yellow-400 fill-yellow-400'
+                                      : 'text-neutral-300'
+                                  }`}
+                                />
+                              ))}
+                              <span className="ml-2 text-xs font-semibold text-neutral-600">
+                                {depoimento.nota}.0
+                              </span>
+                            </div>
+                            
+                            {/* Texto do depoimento */}
+                            <p className="text-neutral-700 mb-4 leading-relaxed text-sm italic relative">
+                              <span className="absolute -left-1 -top-1 text-3xl text-[#1B4B7B]/10 font-serif leading-none">"</span>
+                              {depoimento.texto}
+                              <span className="absolute -right-1 -bottom-3 text-3xl text-[#1B4B7B]/10 font-serif leading-none">"</span>
+                            </p>
+                            
+                            {/* Informações do cliente - Design premium */}
+                            <div className="flex items-center gap-3 pt-4 border-t border-neutral-200/80">
+                              {/* Foto do cliente (se disponível) */}
+                              {depoimento.foto ? (
+                                <img
+                                  src={depoimento.foto}
+                                  alt={depoimento.nome}
+                                  className="w-10 h-10 rounded-full object-cover border-2 border-neutral-200"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1B4B7B]/20 to-[#1B4B7B]/10 flex items-center justify-center border-2 border-neutral-200">
+                                  <span className="text-base font-bold text-[#1B4B7B]">
+                                    {depoimento.nome.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <p className="font-semibold text-neutral-900 mb-1 text-sm">{depoimento.nome}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-xs text-neutral-600">{depoimento.cidade}</p>
+                                  {depoimento.data && (
+                                    <>
+                                      <span className="text-neutral-400">•</span>
+                                      <p className="text-xs text-neutral-500">{depoimento.data}</p>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Linha decorativa no hover */}
+                          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Botões de navegação - Mobile */}
+                {depoimentos.length > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-4">
+                    <button
+                      onClick={prevDepoimento}
+                      className="bg-white/90 hover:bg-white text-neutral-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                      aria-label="Depoimento anterior"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    <button
+                      onClick={nextDepoimento}
+                      className="bg-white/90 hover:bg-white text-neutral-800 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                      aria-label="Próximo depoimento"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                
+                {/* Indicadores - Mobile */}
+                {depoimentos.length > 1 && (
+                  <div className="flex justify-center gap-2 mt-3">
+                    {depoimentos.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setDepoimentoSlide(index)}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          index === depoimentoSlide ? 'w-8 bg-[#1B4B7B]' : 'w-2 bg-neutral-300'
+                        }`}
+                        aria-label={`Ir para depoimento ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Grid Desktop */}
+              <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {depoimentos.map((depoimento, index) => (
                 <div
                   key={index}
                   className="group relative bg-white p-8 rounded-2xl border border-neutral-200/80 hover:border-[#1B4B7B]/40 transition-all duration-500 shadow-sm hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden"
@@ -740,7 +1050,8 @@ function App() {
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1B4B7B]/0 to-transparent group-hover:via-[#1B4B7B] transition-all duration-500"></div>
                 </div>
               ))}
-            </div>
+              </div>
+            </>
           )}
           
           {/* Link para ver mais avaliações no Google */}
@@ -799,14 +1110,15 @@ function App() {
                 {ambientes.map((ambiente, index) => (
                   <div
                     key={index}
-                    className="min-w-full relative h-full bg-gradient-to-br from-blue-50 via-neutral-100 to-blue-50"
+                    className="min-w-full relative h-full bg-gradient-to-br from-blue-50 via-neutral-100 to-blue-50 cursor-pointer group"
+                    onClick={() => openAmbienteModal(index)}
                   >
                     {/* Se a imagem não falhou ao carregar, mostra a imagem */}
                     {!imageErrors.includes(index) ? (
                       <img
                         src={ambiente.imagem}
                         alt={ambiente.nome}
-                        className="w-full h-full object-cover object-center"
+                        className="w-full h-full object-cover object-center group-hover:opacity-90 transition-opacity"
                         onError={() => {
                           // Se a imagem falhar, adiciona o índice ao array de erros
                           setImageErrors(prev => [...prev, index])
@@ -879,6 +1191,21 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* ============================================
+          MODAL DO CARROSSEL DE AMBIENTES (SEÇÃO 4)
+          ============================================
+          Modal premium para exibir imagens do carrossel em tamanho maior
+      */}
+      <GalleryModal
+        isOpen={selectedAmbienteIndex !== null}
+        onClose={closeAmbienteModal}
+        images={ambientesParaModal}
+        currentIndex={ambienteModalIndex}
+        onNext={nextAmbienteModal}
+        onPrev={prevAmbienteModal}
+        onSelectImage={setAmbienteModalIndex}
+      />
 
       {/* ============================================
           SECTION 5 - GOOGLE MAPS
@@ -1096,26 +1423,43 @@ function App() {
       </footer>
 
       {/* ============================================
-          BOTÃO FLUTUANTE DO WHATSAPP
+          BOTÃO FLUTUANTE DO WHATSAPP (PREMIUM)
           ============================================
           Posição: Fixo no canto inferior direito
           Funcionalidade: Abre WhatsApp diretamente
+          Design: Premium com animações e efeitos visuais
       */}
       <a
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:bg-[#20BA5A] transition-all duration-300 z-50 hover:scale-110 group"
+        className="group fixed bottom-6 right-6 z-50 inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#25D366] via-[#20BA5A] to-[#25D366] text-white rounded-full shadow-2xl hover:shadow-[0_0_25px_rgba(37,211,102,0.7)] transition-all duration-300 hover:scale-110 animate-pulse-slow overflow-hidden"
         aria-label="Fale conosco no WhatsApp"
       >
-        {/* Ícone do WhatsApp */}
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+        {/* Anel de pulso animado */}
+        <div className="absolute inset-0 rounded-full border-2 border-white/60 animate-ping-slow opacity-75"></div>
+        
+        {/* Efeito de brilho animado */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
+        
+        {/* Efeito de partículas/brilho no centro */}
+        <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 opacity-50"></div>
+        
+        {/* Ícone do WhatsApp com animação */}
+        <svg className="w-8 h-8 relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
-        {/* Tooltip que aparece no hover */}
-        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-          Fale conosco
-        </span>
+        
+        {/* Tooltip premium que aparece no hover */}
+        <div className="absolute -top-14 right-0 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-1 pointer-events-none">
+          <div className="relative bg-gradient-to-r from-[#25D366] to-[#20BA5A] text-white text-sm font-bold px-4 py-2 rounded-lg shadow-xl whitespace-nowrap">
+            <span>Fale conosco</span>
+            {/* Seta do tooltip */}
+            <div className="absolute bottom-0 right-4 translate-y-full">
+              <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#20BA5A]"></div>
+            </div>
+          </div>
+        </div>
       </a>
     </div>
   )
